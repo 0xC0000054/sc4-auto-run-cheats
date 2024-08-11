@@ -342,7 +342,7 @@ private:
 			ParseCommandString(tree.get<std::string>("Tile.RunOnceCommandList"), tileLoadRunOnceCommands);
 			ParseCommandString(tree.get<std::string>("EstablishedTile.CommandList"), establishedTileLoadCommands);
 			ParseCommandString(tree.get<std::string>("EstablishedTile.RunOnceCommandList"), establishedTileLoadRunOnceCommands);
-			ParseCommandString(tree.get<std::string>("UnestablishedTile.CommandList"), unestablishedTileLoadRunOnceCommands);
+			ParseCommandString(tree.get<std::string>("UnestablishedTile.CommandList"), unestablishedTileLoadCommands);
 			ParseCommandString(tree.get<std::string>("UnestablishedTile.RunOnceCommandList"), unestablishedTileLoadRunOnceCommands);
 			result = true;
 		}
