@@ -15,6 +15,8 @@
 #include "version.h"
 #include "StringViewUtil.h"
 #include "cIGZCheatCodeManager.h"
+#include "cIGZCommandParameterSet.h"
+#include "cIGZCommandServer.h"
 #include "cIGZCOM.h"
 #include "cIGZFrameWork.h"
 #include "cIGZMessage2Standard.h"
@@ -61,21 +63,47 @@ namespace
 		return temp.parent_path();
 	}
 
-	void ExecuteCheatList(const std::vector<cRZBaseString>& cheats, cIGZCheatCodeManager* pCheatCodeManager)
+	void ExecuteCheatList(
+		const std::vector<cRZBaseString>& cheats,
+		cIGZCheatCodeManager* pCheatCodeManager,
+		cIGZCommandServer* pCommandServer)
 	{
 		Logger& logger = Logger::GetInstance();
 
-		for (const auto& cheatString : cheats)
+		for (const auto& command : cheats)
 		{
-			uint32_t cheatID = 0;
+			uint32_t id = 0;
 
-			if (pCheatCodeManager->DoesCheatCodeMatch(cheatString, cheatID))
+			if (pCheatCodeManager->DoesCheatCodeMatch(command, id))
 			{
-				pCheatCodeManager->SendCheatNotifications(cheatString, cheatID);
+				pCheatCodeManager->SendCheatNotifications(command, id);
 			}
 			else
 			{
-				logger.WriteLineFormatted(LogLevel::Error, "Unknown cheat code: %s", cheatString.ToChar());
+				cIGZCommandParameterSet* inputParameters = nullptr;
+
+				if (pCommandServer->ConvertStringToCommand(
+					command.ToChar(),
+					command.Strlen(),
+					id,
+					inputParameters))
+				{
+					cRZAutoRefCount<cIGZCommandParameterSet> outputParameters;
+
+					if (pCommandServer->CreateCommandParameterSet(outputParameters.AsPPObj()))
+					{
+						pCommandServer->ExecuteCommand(id, inputParameters, outputParameters);
+					}
+
+					if (inputParameters)
+					{
+						inputParameters->Release();
+					}
+				}
+				else
+				{
+					logger.WriteLineFormatted(LogLevel::Error, "Unknown cheat or command: %s", command.ToChar());
+				}
 			}
 		}
 	}
@@ -141,13 +169,13 @@ public:
 
 private:
 
-	void ExecuteEstablishedCityCommands(cIGZCheatCodeManager* pCheatCodeManager)
+	void ExecuteEstablishedCityCommands(cIGZCheatCodeManager* pCheatCodeManager, cIGZCommandServer* pCommandServer)
 	{
-		ExecuteCheatList(establishedTileLoadCommands, pCheatCodeManager);
+		ExecuteCheatList(establishedTileLoadCommands, pCheatCodeManager, pCommandServer);
 
 		if (!establishedTileLoadRunOnceCommands.empty())
 		{
-			ExecuteCheatList(establishedTileLoadRunOnceCommands, pCheatCodeManager);
+			ExecuteCheatList(establishedTileLoadRunOnceCommands, pCheatCodeManager, pCommandServer);
 			establishedTileLoadRunOnceCommands.clear();
 		}
 	}
@@ -159,10 +187,11 @@ private:
 		if (pSC4App)
 		{
 			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+			cIGZCommandServerPtr pCommandServer;
 
-			if (pCheatCodeManager)
+			if (pCheatCodeManager && pCommandServer)
 			{
-				ExecuteEstablishedCityCommands(pCheatCodeManager);
+				ExecuteEstablishedCityCommands(pCheatCodeManager, pCommandServer);
 
 				if (establishedTileLoadCommands.empty()
 					&& establishedTileLoadRunOnceCommands.empty())
@@ -184,28 +213,35 @@ private:
 			if (pSC4App)
 			{
 				cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+				cIGZCommandServerPtr pCommandServer;
 
-				if (pCheatCodeManager)
+				if (pCheatCodeManager && pCommandServer)
 				{
-					ExecuteCheatList(tileLoadCommands, pCheatCodeManager);
+					ExecuteCheatList(tileLoadCommands, pCheatCodeManager, pCommandServer);
 
 					if (!tileLoadRunOnceCommands.empty())
 					{
-						ExecuteCheatList(tileLoadRunOnceCommands, pCheatCodeManager);
+						ExecuteCheatList(tileLoadRunOnceCommands, pCheatCodeManager, pCommandServer);
 						tileLoadRunOnceCommands.clear();
 					}
 
 					if (pCity->GetEstablished())
 					{
-						ExecuteEstablishedCityCommands(pCheatCodeManager);
+						ExecuteEstablishedCityCommands(pCheatCodeManager, pCommandServer);
 					}
 					else
 					{
-						ExecuteCheatList(unestablishedTileLoadCommands, pCheatCodeManager);
+						ExecuteCheatList(
+							unestablishedTileLoadCommands,
+							pCheatCodeManager,
+							pCommandServer);
 
 						if (!unestablishedTileLoadRunOnceCommands.empty())
 						{
-							ExecuteCheatList(unestablishedTileLoadRunOnceCommands, pCheatCodeManager);
+							ExecuteCheatList(
+								unestablishedTileLoadRunOnceCommands,
+								pCheatCodeManager,
+								pCommandServer);
 							unestablishedTileLoadRunOnceCommands.clear();
 						}
 					}
@@ -231,10 +267,11 @@ private:
 		if (pSC4App)
 		{
 			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+			cIGZCommandServerPtr pCommandServer;
 
-			if (pCheatCodeManager)
+			if (pCheatCodeManager && pCommandServer)
 			{
-				ExecuteCheatList(appStartupCommands, pCheatCodeManager);
+				ExecuteCheatList(appStartupCommands, pCheatCodeManager, pCommandServer);
 
 				// The application startup commands are only run once when
 				// the first region is loaded.
