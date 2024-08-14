@@ -28,14 +28,31 @@ Note that depending on the permissions of your SimCity 4 installation directory 
 
 ### Settings overview
 
-The options are entered as a comma-separated list of cheat codes that will be applied at the specified stages
-in the game's loading process.
+The commands or cheat codes will be applied at the specified stages in the game's loading process.
 The `RunOnce` versions will only be applied for the first matching city tile that is loaded.
+
+The command strings can use one of two formats:
+
+* A comma-separated list of commands/cheats.
+* A `File:<path>` string that specifies an external file containing the commands/cheats.
 
 [Startup]: The commands in this section will be run once when the game starts up.    
 [Tile]: The commands in this section will be run when loading either an established or unestablished city tile.    
-[EstablishedTile]: The commands in this section will be run when loading an established city tile.    
+[EstablishedTile]: The commands in this section will be run when loading an established city tile or when a city is established.    
 [UnestablishedTile]: The commands in this section will be run when loading an unestablished city tile.
+
+#### External File Format
+
+The external file must place each command or cheat on its own line.
+The cheats/commands will be executed sequentially starting from the top of the file.
+
+Example:
+
+```
+You don't deserve it
+TerrainQuery
+```
+
 
 ## Troubleshooting
 

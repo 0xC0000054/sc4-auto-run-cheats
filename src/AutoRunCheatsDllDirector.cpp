@@ -112,16 +112,42 @@ namespace
 	{
 		if (!input.empty())
 		{
-			std::vector<std::string_view> commands;
+			constexpr std::string_view filePrefix = "File:"sv;
 
-			StringViewUtil::Split(input, ',', commands);
-
-			for (const auto& command : commands)
+			if (input.starts_with(filePrefix))
 			{
-				// Trim any leading or trailing white space from the string.
-				const std::string_view trimmedCommand = StringViewUtil::TrimWhiteSpace(command);
+				if (input.length() > filePrefix.size())
+				{
+					std::string path = input.substr(filePrefix.size());
 
-				output.push_back(cRZBaseString(trimmedCommand.data(), trimmedCommand.size()));
+					std::ifstream externalCommandFile(path);
+
+					// The external command file lists each command on its own line.
+					// This is intended for users that want to do things like automate the
+					// network or zone placements when they establish a city.
+
+					for (std::string line; std::getline(externalCommandFile, line);)
+					{
+						if (!line.empty())
+						{
+							output.push_back(cRZBaseString(line));
+						}
+					}
+				}
+			}
+			else
+			{
+				std::vector<std::string_view> commands;
+
+				StringViewUtil::Split(input, ',', commands);
+
+				for (const auto& command : commands)
+				{
+					// Trim any leading or trailing white space from the string.
+					const std::string_view trimmedCommand = StringViewUtil::TrimWhiteSpace(command);
+
+					output.push_back(cRZBaseString(trimmedCommand.data(), trimmedCommand.size()));
+				}
 			}
 		}
 	}
