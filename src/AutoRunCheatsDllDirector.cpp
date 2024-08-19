@@ -108,6 +108,23 @@ namespace
 		}
 	}
 
+	void ParseCommandFile(const std::string& path, std::vector<cRZBaseString>& output)
+	{
+		std::ifstream externalCommandFile(path);
+
+		// The external command file lists each command on its own line.
+		// This is intended for users that want to do things like automate the
+		// network or zone placements when they establish a city.
+
+		for (std::string line; std::getline(externalCommandFile, line);)
+		{
+			if (!line.empty())
+			{
+				output.push_back(cRZBaseString(line));
+			}
+		}
+	}
+
 	void ParseCommandString(const std::string& input, std::vector<cRZBaseString>& output)
 	{
 		if (!input.empty())
@@ -120,19 +137,7 @@ namespace
 				{
 					std::string path = input.substr(filePrefix.size());
 
-					std::ifstream externalCommandFile(path);
-
-					// The external command file lists each command on its own line.
-					// This is intended for users that want to do things like automate the
-					// network or zone placements when they establish a city.
-
-					for (std::string line; std::getline(externalCommandFile, line);)
-					{
-						if (!line.empty())
-						{
-							output.push_back(cRZBaseString(line));
-						}
-					}
+					ParseCommandFile(path, output);
 				}
 			}
 			else
