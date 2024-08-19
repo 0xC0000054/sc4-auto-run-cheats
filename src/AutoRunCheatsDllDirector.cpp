@@ -118,7 +118,8 @@ namespace
 
 		for (std::string line; std::getline(externalCommandFile, line);)
 		{
-			if (!line.empty())
+			// Lines that start with a semicolon are comments.
+			if (!line.empty() && line[0] != ';')
 			{
 				output.push_back(cRZBaseString(line));
 			}
