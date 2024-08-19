@@ -1,21 +1,19 @@
 #pragma once
 #include "cIGZUnknown.h"
-#include "cRZAutoRefCount.h"
 #include <list>
 #include <vector>
 
 class cIGZString;
-class cLocation;
 class cISC4RegionalCity;
-
+class SC4String;
 
 class cISC4Region : public cIGZUnknown
 {
 	public:
-		virtual char* GetName(void) = 0;
+		virtual SC4String* GetName(void) = 0;
 		virtual bool SetName(const cIGZString& szName) = 0;
 
-		virtual char* GetDirectoryName(void) = 0;
+		virtual SC4String* GetDirectoryName(void) = 0;
 		virtual bool SetDirectoryName(const cIGZString& szName) = 0;
 
 		virtual bool LoadConfig(void) = 0;
@@ -30,7 +28,7 @@ class cISC4Region : public cIGZUnknown
 		virtual bool DeleteCity(cISC4RegionalCity*& pCity) = 0;
 		virtual bool ReloadCity(cISC4RegionalCity*& pCity) = 0;
 		virtual bool MoveCity(cISC4Region* pRegion, cISC4RegionalCity* pCity, int32_t x, int32_t y) = 0;
-		virtual bool GetAllCities(std::list<cRZAutoRefCount<cISC4RegionalCity>>& pList) = 0;
+		virtual bool GetAllCities(std::list<cISC4RegionalCity*>& pList) = 0;
 
 		virtual int GetBaseTerrainType(void) = 0;
 		virtual cISC4Region* SetBaseTerrainType(int nType) = 0;
@@ -40,6 +38,6 @@ class cISC4Region : public cIGZUnknown
 
 		virtual bool ResetTutorialCity(uint32_t dwTutorialCityID) = 0;
 
-		virtual void GetCityLocations(std::vector<cLocation> pVector) = 0;
+		virtual bool GetCityLocations(intptr_t pVector) = 0;
 		virtual int32_t GetBoundingRect(intptr_t pRectLongs) = 0;
 };

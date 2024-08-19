@@ -1,6 +1,8 @@
 #pragma once
 #include "cIGZUnknown.h"
 
+static const uint32_t GZIID_cIGZSystemService = 0x287fb697;
+
 /**
  * @brief An interface for services that provide helpers and run on ticks
  *
@@ -45,19 +47,19 @@ class cIGZSystemService : public cIGZUnknown
 		 * @brief A callback for post-framework initialization
 		 */
 		virtual bool Init(void) = 0;
-		
+
 		/**
 		 * @brief A callback for pre-framework shutdown
 		 */
 		virtual bool Shutdown(void) = 0;
-		
+
 		/**
 		 * @brief A callback for each active tick when the game is focused
 		 *
 		 * The service must be registered to receive active tick callbacks via
 		 * cIGZFrameWork::AddToTick(cIGZSystemService* pService)
 		 */
-		virtual bool OnTick(void) = 0;
+		virtual bool OnTick(uint32_t unknown1) = 0;
 
 		/**
 		 * @brief A callback for each idle tick when the game is not focused
@@ -65,5 +67,10 @@ class cIGZSystemService : public cIGZUnknown
 		 * The service must be registered to receive idle tick callbacks via
 		 * cIGZFrameWork::AddToOnIdle(cIGZSystemService* pService)
 		 */
-		virtual bool OnIdle(void) = 0;
+		virtual bool OnIdle(uint32_t unknown1) = 0;
+
+		/**
+		 * @return This service's tick priority. Lower values yield more priority
+		 */
+		virtual int32_t GetServiceTickPriority() = 0;
 };

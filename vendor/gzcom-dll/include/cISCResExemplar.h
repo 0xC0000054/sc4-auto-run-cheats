@@ -5,6 +5,8 @@ class cGZPersistResourceKey;
 class cISCPropertyHolder;
 class cISCResExemplarCohort;
 
+static const uint32_t GZIID_cISCResExemplar = 0xA52160F5;
+
 class cISCResExemplar : public cIGZSerializable
 {
 	public:

@@ -6,7 +6,6 @@ class SC4Percentage;
 class cISC4Demand : public cIGZUnknown
 {
 public:
-
 	virtual bool Init() = 0;
 	virtual bool Shutdown() = 0;
 	virtual bool SimulationBegin() = 0;
@@ -33,7 +32,7 @@ public:
 	virtual bool SetActiveDemandMin(float value) = 0;
 
 	virtual float GetEconomyModifier() const = 0;
-	virtual bool SetEconomyModifier() = 0;
+	virtual bool SetEconomyModifier(float value) = 0;
 
 	virtual float GetTaxModifier() const = 0;
 	virtual bool SetTaxModifier(float value) = 0;

@@ -1,5 +1,6 @@
 #pragma once
 #include "cIGZUnknown.h"
+#include "cISC4BuildingOccupant.h"
 #include <list>
 #include <vector>
 
@@ -14,8 +15,8 @@ class cISC4ResidentialSimulator : public cIGZUnknown
 		virtual bool Init(void) = 0;
 		virtual bool Shutdown(void) = 0;
 
-		virtual intptr_t GetProximityMap(uint8_t cWealthType) = 0;
-		
+		virtual cISC4SimGrid<uint8_t>* GetProximityMap(cISC4BuildingOccupant::WealthType eWealthType) = 0;
+
 		virtual bool SchoolIsOnStrike(void) = 0;
 		virtual bool HealthIsOnStrike(void) = 0;
 
@@ -49,10 +50,10 @@ class cISC4ResidentialSimulator : public cIGZUnknown
 		virtual bool GetHospitalQueryData(cISC4Occupant* pOccupant, intptr_t pQueryData) = 0;
 
 		virtual bool EstimateCurrentOccupantCapacity(cISC4Occupant* pOccupant, uint32_t& dwUnknown1, uint32_t& dwUnknown2) = 0;
-		
+
 		virtual int32_t GetCellLifeExpectancy(uint32_t dwCellX, uint32_t dwCellZ) = 0;
 		virtual float GetCellWorkforcePercent (uint32_t dwCellX, uint32_t dwCellZ) = 0;
-		
+
 		virtual float GetGlobalWorkforcePercent(void) = 0;
 		virtual float GetGlobalEQ(void) = 0;
 		virtual float GetGlobalHQ(void) = 0;
@@ -60,15 +61,15 @@ class cISC4ResidentialSimulator : public cIGZUnknown
 
 		virtual float GetCellEQ(uint32_t dwCellX, uint32_t dwCellZ) = 0;
 		virtual float GetCellHQ(uint32_t dwCellX, uint32_t dwCellZ) = 0;
-		
-		virtual float GetCellEQByWealth(uint32_t dwCellX, uint32_t dwCellZ, uint8_t cWealthType) = 0;
-		virtual float GetCellHQByWealth(uint32_t dwCellX, uint32_t dwCellZ, uint8_t cWealthType) = 0;
+
+		virtual float GetCellEQByWealth(uint32_t dwCellX, uint32_t dwCellZ, cISC4BuildingOccupant::WealthType eWealthType) = 0;
+		virtual float GetCellHQByWealth(uint32_t dwCellX, uint32_t dwCellZ, cISC4BuildingOccupant::WealthType eWealthType) = 0;
 
 		virtual int32_t GetSchoolAverageGradeMap(void) = 0;
 		virtual int32_t GetHospitalAverageGradeMap(void) = 0;
 		virtual int32_t GetAverageAgeMap(void) = 0;
 
-		virtual int32_t GetAverageNewAgeByWealth(uint8_t cWealthType) = 0;
+		virtual int32_t GetAverageNewAgeByWealth(cISC4BuildingOccupant::WealthType eWealthType) = 0;
 		virtual bool GetEQMinAndMaxCellCoords(uint32_t& dwMinCellX, uint32_t& dwMinCellZ, uint32_t& dwMaxCellX, uint32_t& dwMaxCellZ, float& fMin, float& fMax) = 0;
 		virtual bool GetHQMinAndMaxCellCoords(uint32_t& dwMinCellX, uint32_t& dwMinCellZ, uint32_t& dwMaxCellX, uint32_t& dwMaxCellZ, float& fMin, float& fMax) = 0;
 
@@ -93,6 +94,6 @@ class cISC4ResidentialSimulator : public cIGZUnknown
 		virtual bool SetAutoBudget(bool bEnable) = 0;
 
 		virtual bool EstimateIdealFunding(cISC4Occupant* pOccupant, SC4Percentage& sFunding) = 0;
-		
+
 		virtual void ToggleTractTracking(int32_t nUnknown1, int32_t nUnknown2) = 0;
 };
