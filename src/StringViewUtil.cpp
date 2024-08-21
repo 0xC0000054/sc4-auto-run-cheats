@@ -13,6 +13,19 @@
 
 #include "StringViewUtil.h"
 #include "boost/algorithm/string.hpp"
+#include <charconv>
+
+bool StringViewUtil::EqualsIgnoreCase(const std::string_view& lhs, const std::string_view& rhs)
+{
+	return lhs.length() == rhs.length()
+		&& boost::iequals(lhs, rhs);
+}
+
+bool StringViewUtil::StartsWithIgnoreCase(const std::string_view& lhs, const std::string_view& rhs)
+{
+	return lhs.length() >=  rhs.length()
+		&& boost::istarts_with(lhs, rhs);
+}
 
 void StringViewUtil::Split(
 	const std::string_view& input,
@@ -93,4 +106,36 @@ void StringViewUtil::Split(
 std::string_view StringViewUtil::TrimWhiteSpace(const std::string_view& input)
 {
 	return boost::trim_copy(input);
+}
+
+bool StringViewUtil::TryParse(const std::string_view& input, long& outValue)
+{
+	const char* start = input.data();
+	const char* end = start + input.size();
+
+	const std::from_chars_result result = std::from_chars(start, end, outValue);
+
+	if (result.ec == std::errc{} && result.ptr == end)
+	{
+		return true;
+	}
+
+	outValue = 0;
+	return false;
+}
+
+bool StringViewUtil::TryParse(const std::string_view& input, uint32_t& outValue)
+{
+	const char* start = input.data();
+	const char* end = start + input.size();
+
+	const std::from_chars_result result = std::from_chars(start, end, outValue);
+
+	if (result.ec == std::errc{} && result.ptr == end)
+	{
+		return true;
+	}
+
+	outValue = 0;
+	return false;
 }

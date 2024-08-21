@@ -14,6 +14,7 @@
 #include "Logger.h"
 #include "version.h"
 #include "StringViewUtil.h"
+#include "CheatListCommandFactory.h"
 #include "cIGZCheatCodeManager.h"
 #include "cIGZCommandParameterSet.h"
 #include "cIGZCommandServer.h"
@@ -64,7 +65,8 @@ namespace
 	}
 
 	void ExecuteCheatList(
-		const std::vector<cRZBaseString>& cheats,
+		const std::vector<std::unique_ptr<ICheatListCommand>>& cheats,
+		cISC4City* pCity,
 		cIGZCheatCodeManager* pCheatCodeManager,
 		cIGZCommandServer* pCommandServer)
 	{
@@ -72,43 +74,14 @@ namespace
 
 		for (const auto& command : cheats)
 		{
-			uint32_t id = 0;
-
-			if (pCheatCodeManager->DoesCheatCodeMatch(command, id))
+			if (command)
 			{
-				pCheatCodeManager->SendCheatNotifications(command, id);
-			}
-			else
-			{
-				cIGZCommandParameterSet* inputParameters = nullptr;
-
-				if (pCommandServer->ConvertStringToCommand(
-					command.ToChar(),
-					command.Strlen(),
-					id,
-					inputParameters))
-				{
-					cRZAutoRefCount<cIGZCommandParameterSet> outputParameters;
-
-					if (pCommandServer->CreateCommandParameterSet(outputParameters.AsPPObj()))
-					{
-						pCommandServer->ExecuteCommand(id, inputParameters, outputParameters);
-					}
-
-					if (inputParameters)
-					{
-						inputParameters->Release();
-					}
-				}
-				else
-				{
-					logger.WriteLineFormatted(LogLevel::Error, "Unknown cheat or command: %s", command.ToChar());
-				}
+				command->Execute(pCity, pCheatCodeManager, pCommandServer);
 			}
 		}
 	}
 
-	void ParseCommandFile(const std::string& path, std::vector<cRZBaseString>& output)
+	void ParseCommandFile(const std::string& path, std::vector<std::unique_ptr<ICheatListCommand>>& output)
 	{
 		std::ifstream externalCommandFile(path);
 
@@ -121,39 +94,46 @@ namespace
 			// Lines that start with a semicolon are comments.
 			if (!line.empty() && line[0] != ';')
 			{
-				output.push_back(cRZBaseString(line));
+				output.push_back(CheatListCommandFactory::Create(line));
 			}
 		}
 	}
 
-	void ParseCommandString(const std::string& input, std::vector<cRZBaseString>& output)
+	void ParseCommandString(const std::string& input, std::vector<std::unique_ptr<ICheatListCommand>>& output)
 	{
 		if (!input.empty())
 		{
 			constexpr std::string_view filePrefix = "File:"sv;
 
-			if (input.starts_with(filePrefix))
+			try
 			{
-				if (input.length() > filePrefix.size())
+				if (input.starts_with(filePrefix))
 				{
-					std::string path = input.substr(filePrefix.size());
+					if (input.length() > filePrefix.size())
+					{
+						std::string path = input.substr(filePrefix.size());
 
-					ParseCommandFile(path, output);
+						ParseCommandFile(path, output);
+					}
+				}
+				else
+				{
+					std::vector<std::string_view> commands;
+
+					StringViewUtil::Split(input, ',', commands);
+
+					for (const auto& command : commands)
+					{
+						// Trim any leading or trailing white space from the string.
+						const std::string_view trimmedCommand = StringViewUtil::TrimWhiteSpace(command);
+
+						output.push_back(CheatListCommandFactory::Create(trimmedCommand));
+					}
 				}
 			}
-			else
+			catch (const std::exception& e)
 			{
-				std::vector<std::string_view> commands;
-
-				StringViewUtil::Split(input, ',', commands);
-
-				for (const auto& command : commands)
-				{
-					// Trim any leading or trailing white space from the string.
-					const std::string_view trimmedCommand = StringViewUtil::TrimWhiteSpace(command);
-
-					output.push_back(cRZBaseString(trimmedCommand.data(), trimmedCommand.size()));
-				}
+				Logger::GetInstance().WriteLine(LogLevel::Error, e.what());
 			}
 		}
 	}
@@ -201,34 +181,50 @@ public:
 
 private:
 
-	void ExecuteEstablishedCityCommands(cIGZCheatCodeManager* pCheatCodeManager, cIGZCommandServer* pCommandServer)
+	void ExecuteEstablishedCityCommands(
+		cISC4City* pCity,
+		cIGZCheatCodeManager* pCheatCodeManager,
+		cIGZCommandServer* pCommandServer)
 	{
-		ExecuteCheatList(establishedTileLoadCommands, pCheatCodeManager, pCommandServer);
+		ExecuteCheatList(
+			establishedTileLoadCommands,
+			pCity,
+			pCheatCodeManager,
+			pCommandServer);
 
 		if (!establishedTileLoadRunOnceCommands.empty())
 		{
-			ExecuteCheatList(establishedTileLoadRunOnceCommands, pCheatCodeManager, pCommandServer);
+			ExecuteCheatList(
+				establishedTileLoadRunOnceCommands,
+				pCity,
+				pCheatCodeManager,
+				pCommandServer);
 			establishedTileLoadRunOnceCommands.clear();
 		}
 	}
 
-	void CityEstablished()
+	void CityEstablished(cIGZMessage2Standard* pStandardMsg)
 	{
-		cISC4AppPtr pSC4App;
+		cISC4City* pCity = static_cast<cISC4City*>(pStandardMsg->GetVoid1());
 
-		if (pSC4App)
+		if (pCity)
 		{
-			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-			cIGZCommandServerPtr pCommandServer;
+			cISC4AppPtr pSC4App;
 
-			if (pCheatCodeManager && pCommandServer)
+			if (pSC4App)
 			{
-				ExecuteEstablishedCityCommands(pCheatCodeManager, pCommandServer);
+				cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+				cIGZCommandServerPtr pCommandServer;
 
-				if (establishedTileLoadCommands.empty()
-					&& establishedTileLoadRunOnceCommands.empty())
+				if (pCheatCodeManager && pCommandServer)
 				{
-					RemoveNotification(kSC4MessageCityEstablished);
+					ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
+
+					if (establishedTileLoadCommands.empty()
+						&& establishedTileLoadRunOnceCommands.empty())
+					{
+						RemoveNotification(kSC4MessageCityEstablished);
+					}
 				}
 			}
 		}
@@ -249,22 +245,31 @@ private:
 
 				if (pCheatCodeManager && pCommandServer)
 				{
-					ExecuteCheatList(tileLoadCommands, pCheatCodeManager, pCommandServer);
+					ExecuteCheatList(
+						tileLoadCommands,
+						pCity,
+						pCheatCodeManager,
+						pCommandServer);
 
 					if (!tileLoadRunOnceCommands.empty())
 					{
-						ExecuteCheatList(tileLoadRunOnceCommands, pCheatCodeManager, pCommandServer);
+						ExecuteCheatList(
+							tileLoadRunOnceCommands,
+							pCity,
+							pCheatCodeManager,
+							pCommandServer);
 						tileLoadRunOnceCommands.clear();
 					}
 
 					if (pCity->GetEstablished())
 					{
-						ExecuteEstablishedCityCommands(pCheatCodeManager, pCommandServer);
+						ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
 					}
 					else
 					{
 						ExecuteCheatList(
 							unestablishedTileLoadCommands,
+							pCity,
 							pCheatCodeManager,
 							pCommandServer);
 
@@ -272,6 +277,7 @@ private:
 						{
 							ExecuteCheatList(
 								unestablishedTileLoadRunOnceCommands,
+								pCity,
 								pCheatCodeManager,
 								pCommandServer);
 							unestablishedTileLoadRunOnceCommands.clear();
@@ -303,7 +309,7 @@ private:
 
 			if (pCheatCodeManager && pCommandServer)
 			{
-				ExecuteCheatList(appStartupCommands, pCheatCodeManager, pCommandServer);
+				ExecuteCheatList(appStartupCommands, nullptr, pCheatCodeManager, pCommandServer);
 
 				// The application startup commands are only run once when
 				// the first region is loaded.
@@ -319,7 +325,7 @@ private:
 		switch (pStandardMsg->GetType())
 		{
 		case kSC4MessageCityEstablished:
-			CityEstablished();
+			CityEstablished(pStandardMsg);
 			break;
 		case kSC4MessagePostCityInitComplete:
 			PostCityInitComplete(pStandardMsg);
@@ -437,13 +443,13 @@ private:
 	}
 
 	std::filesystem::path configFilePath;
-	std::vector<cRZBaseString> appStartupCommands;
-	std::vector<cRZBaseString> tileLoadCommands;
-	std::vector<cRZBaseString> tileLoadRunOnceCommands;
-	std::vector<cRZBaseString> establishedTileLoadCommands;
-	std::vector<cRZBaseString> establishedTileLoadRunOnceCommands;
-	std::vector<cRZBaseString> unestablishedTileLoadCommands;
-	std::vector<cRZBaseString> unestablishedTileLoadRunOnceCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> appStartupCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadRunOnceCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> establishedTileLoadCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> establishedTileLoadRunOnceCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> unestablishedTileLoadCommands;
+	std::vector<std::unique_ptr<ICheatListCommand>> unestablishedTileLoadRunOnceCommands;
 };
 
 cRZCOMDllDirector* RZGetCOMDllDirector() {

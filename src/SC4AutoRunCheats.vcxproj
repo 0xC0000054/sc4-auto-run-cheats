@@ -13,16 +13,27 @@
   <ItemGroup>
     <ClInclude Include="..\vendor\gzcom-dll\include\cIGZCmdLine.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cIGZFrameWork.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cISC4ZoneManager.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cRZCellMap.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cRZCOMDllDirector.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\SC4CellRegion.h" />
+    <ClInclude Include="cheat_list_commands\CheatListCommandFactory.h" />
+    <ClInclude Include="cheat_list_commands\ICheatListCommand.h" />
+    <ClInclude Include="cheat_list_commands\PlaceZoneCheatListCommand.h" />
+    <ClInclude Include="cheat_list_commands\StringCheatListCommand.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StringViewUtil.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\vendor\gzcom-dll\src\cRZCellMap.cpp" />
     <ClCompile Include="..\vendor\gzcom-dll\src\cRZBaseString.cpp" />
     <ClCompile Include="..\vendor\gzcom-dll\src\cRZCOMDllDirector.cpp" />
     <ClCompile Include="AutoRunCheatsDllDirector.cpp" />
+    <ClCompile Include="cheat_list_commands\CheatListCommandFactory.cpp" />
+    <ClCompile Include="cheat_list_commands\PlaceZoneCheatListCommand.cpp" />
+    <ClCompile Include="cheat_list_commands\StringCheatListCommand.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="StringViewUtil.cpp" />
   </ItemGroup>
@@ -79,7 +90,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\vendor\gzcom-dll\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\vendor\gzcom-dll\include;.\cheat_list_commands;.\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -103,7 +114,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\vendor\gzcom-dll\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\vendor\gzcom-dll\include;.\cheat_list_commands;.\</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseFullPaths>false</UseFullPaths>

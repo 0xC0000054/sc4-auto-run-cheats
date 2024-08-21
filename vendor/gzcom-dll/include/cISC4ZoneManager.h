@@ -9,7 +9,7 @@ template<typename T> class SC4CellRegion;
 class cISC4ZoneManager : public cIGZUnknown
 {
 public:
-	enum class ZoneType : int32_t
+	enum class ZoneType : uint32_t
 	{
 		None = 0,
 		ResidentialLowDensity = 1,
@@ -39,7 +39,7 @@ public:
 	virtual int32_t GetDevelopmentFailureCount(int x, int z) = 0;
 	virtual int32_t GetAbandonedTileCount() = 0;
 
-	virtual bool PlaceZone(SC4CellRegion<long>& cellRegion, ZoneType zoneType, bool unknown3, bool unknown4, bool checkAreaSlope, bool unknown6, bool unknown7, int64_t* unknown8, int32_t* unknown9, intptr_t outLotsDemolishedSet) = 0;
+	virtual bool PlaceZone(SC4CellRegion<long>& cellRegion, ZoneType zoneType, bool placeZone, bool skipFundsCheck, bool checkAreaSlope, bool skipZoneSizeCheck, bool checkLotSize, int64_t* outZonedCellCount, int32_t* outErrorCode, intptr_t outLotsDemolishedSet) = 0;
 
 	virtual ZoneType GetZoneType(int x, int z) = 0;
 	virtual bool IsRCIZone(ZoneType type) = 0;
