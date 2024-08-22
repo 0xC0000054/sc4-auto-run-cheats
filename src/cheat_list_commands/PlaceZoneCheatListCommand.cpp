@@ -41,10 +41,10 @@ namespace
 
 PlaceZoneCheatListCommand::PlaceZoneCheatListCommand(
 	cISC4ZoneManager::ZoneType zoneType,
-	long x1,
-	long y1,
-	long x2,
-	long y2)
+	int32_t x1,
+	int32_t y1,
+	int32_t x2,
+	int32_t y2)
 	: zoneType(zoneType),
 	  x1(x1),
 	  y1(y1),

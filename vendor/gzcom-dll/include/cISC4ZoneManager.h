@@ -39,9 +39,9 @@ public:
 	virtual int32_t GetDevelopmentFailureCount(int x, int z) = 0;
 	virtual int32_t GetAbandonedTileCount() = 0;
 
-	virtual bool PlaceZone(SC4CellRegion<long>& cellRegion, ZoneType zoneType, bool placeZone, bool skipFundsCheck, bool checkAreaSlope, bool skipZoneSizeCheck, bool checkLotSize, int64_t* outZonedCellCount, int32_t* outErrorCode, intptr_t outLotsDemolishedSet) = 0;
+	virtual bool PlaceZone(SC4CellRegion<int32_t>& cellRegion, ZoneType zoneType, bool placeZone, bool skipFundsCheck, bool checkAreaSlope, bool skipZoneSizeCheck, bool checkLotSize, int64_t* outZonedCellCount, int32_t* outErrorCode, intptr_t outLotsDemolishedSet) = 0;
 
-	virtual ZoneType GetZoneType(int x, int z) = 0;
+	virtual ZoneType GetZoneType(int32_t x, int32_t z) = 0;
 	virtual bool IsRCIZone(ZoneType type) = 0;
 
 	virtual bool GetTextureForZone(ZoneType type, cGZPersistResourceKey& key) = 0;
