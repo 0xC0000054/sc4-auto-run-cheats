@@ -114,20 +114,20 @@ cRZCellMap::~cRZCellMap()
 	DestroyData();
 }
 
-bool cRZCellMap::GetValue(uint32_t x, uint32_t y) const
+bool cRZCellMap::GetValue(uint32_t row, uint32_t column) const
 {
-	return (this->data[x][y / 32] & (1 << (y & 31))) != 0;
+	return (this->data[row][column / 32] & (1 << (column & 31))) != 0;
 }
 
-void cRZCellMap::SetValue(uint32_t x, uint32_t y, bool value)
+void cRZCellMap::SetValue(uint32_t row, uint32_t column, bool value)
 {
 	if (value)
 	{
-		this->data[x][y / 32] |= (1 << (y & 31));
+		this->data[row][column / 32] |= (1 << (column & 31));
 	}
 	else
 	{
-		this->data[x][y / 32] &= ~(1 << (y & 31));
+		this->data[row][column / 32] &= ~(1 << (column & 31));
 	}
 }
 

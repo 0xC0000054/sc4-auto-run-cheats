@@ -4,7 +4,7 @@
 class cRZCellMap
 {
 public:
-	cRZCellMap(uint32_t width, uint32_t height, bool initialValue);
+	cRZCellMap(uint32_t rows, uint32_t columns, bool initialValue);
 	cRZCellMap(cRZCellMap const& other);
 	cRZCellMap(cRZCellMap&& other) noexcept;
 
@@ -13,8 +13,8 @@ public:
 
 	virtual ~cRZCellMap();
 
-	bool GetValue(uint32_t x, uint32_t y) const;
-	void SetValue(uint32_t x, uint32_t y, bool value);
+	bool GetValue(uint32_t row, uint32_t column) const;
+	void SetValue(uint32_t row, uint32_t column, bool value);
 
 private:
 	void DestroyData();
