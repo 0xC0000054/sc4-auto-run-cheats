@@ -53,6 +53,23 @@ PlaceZoneCheatListCommand::PlaceZoneCheatListCommand(
 {
 }
 
+std::string PlaceZoneCheatListCommand::GetCommandDescription() const
+{
+	char buffer[1024]{};
+
+	std::snprintf(
+		buffer,
+		sizeof(buffer),
+		"PlaceZone %u %d %d %d %d",
+		static_cast<uint32_t>(zoneType),
+		x1,
+		y1,
+		x2,
+		y2);
+
+	return std::string(buffer);
+}
+
 void PlaceZoneCheatListCommand::Execute(
 	cISC4City* pCity,
 	cIGZCheatCodeManager* pCheatCodeManager,

@@ -20,12 +20,14 @@ class StringCheatListCommand final : public ICheatListCommand
 public:
 	StringCheatListCommand(const std::string_view& view);
 
+private:
+	std::string GetCommandDescription() const override;
+
 	void Execute(
 		cISC4City* pCity,
 		cIGZCheatCodeManager* pCheatCodeManager,
 		cIGZCommandServer* pCommandServer) override;
 
-private:
 	cRZBaseString command;
 };
 

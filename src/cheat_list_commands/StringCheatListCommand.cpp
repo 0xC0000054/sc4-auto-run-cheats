@@ -23,6 +23,11 @@ StringCheatListCommand::StringCheatListCommand(const std::string_view& view)
 {
 }
 
+std::string StringCheatListCommand::GetCommandDescription() const
+{
+	return std::string(command.ToChar(), command.Strlen());
+}
+
 void StringCheatListCommand::Execute(
 	cISC4City* pCity,
 	cIGZCheatCodeManager* pCheatCodeManager,

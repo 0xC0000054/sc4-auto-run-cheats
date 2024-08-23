@@ -76,7 +76,18 @@ namespace
 		{
 			if (command)
 			{
-				command->Execute(pCity, pCheatCodeManager, pCommandServer);
+				try
+				{
+					command->Execute(pCity, pCheatCodeManager, pCommandServer);
+				}
+				catch (const std::exception& e)
+				{
+					logger.WriteLineFormatted(
+						LogLevel::Error,
+						"Error running '%s': %s",
+						command->GetCommandDescription().c_str(),
+						e.what());
+				}
 			}
 		}
 	}

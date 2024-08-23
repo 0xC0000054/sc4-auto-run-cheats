@@ -12,6 +12,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include <string>
 
 class cIGZCheatCodeManager;
 class cIGZCommandServer;
@@ -20,6 +21,8 @@ class cISC4City;
 class ICheatListCommand
 {
 public:
+	virtual std::string GetCommandDescription() const = 0;
+
 	virtual void Execute(
 		cISC4City* pCity,
 		cIGZCheatCodeManager* pCheatCodeManager,

@@ -26,6 +26,8 @@ public:
 		int32_t y2);
 
 private:
+	std::string GetCommandDescription() const override;
+
 	void Execute(
 		cISC4City* pCity,
 		cIGZCheatCodeManager* pCheatCodeManager,
