@@ -13,8 +13,8 @@ public:
 
 	virtual ~cRZCellMap();
 
-	bool GetValue(uint32_t row, uint32_t column) const;
-	void SetValue(uint32_t row, uint32_t column, bool value);
+	bool GetValue(uint32_t column, uint32_t row) const;
+	void SetValue(uint32_t column, uint32_t row, bool value);
 
 private:
 	void DestroyData();
