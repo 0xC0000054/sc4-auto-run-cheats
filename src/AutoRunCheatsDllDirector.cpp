@@ -53,6 +53,7 @@ static constexpr uint32_t kSC4MessagePostRegionInit = 0xCBB5BB45;
 static constexpr uint32_t kAutoRunCheatsDllDirector = 0x21E2B214;
 
 static constexpr uint32_t kLoadZoneBitmapCheatID = 0x5E9F8CFB;
+static constexpr std::string_view kLoadZoneBitmapCheatString = "LoadZoneBitmap";
 
 static constexpr std::string_view PluginConfigFileName = "SC4AutoRunCheats.ini";
 static constexpr std::string_view PluginLogFileName = "SC4AutoRunCheats.log";
@@ -267,7 +268,7 @@ private:
 
 				if (pCheatCodeManager && pCommandServer)
 				{
-					pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString("LoadZoneBitmap"));
+					pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
 					pCheatCodeManager->AddNotification2(this, 0);
 
 					ExecuteCheatList(
@@ -356,44 +357,37 @@ private:
 		if (cheatID == kLoadZoneBitmapCheatID)
 		{
 			const cIGZString* pCheatStr = static_cast<const cIGZString*>(pStandardMsg->GetVoid2());
+			const std::string_view view(pCheatStr->ToChar(), pCheatStr->Strlen());
 
-			std::vector<std::string_view> arguments;
-			arguments.reserve(2);
+			// The command format is: LoadZoneBitmap <path>
+			// We strip the cheat name and the separator space to get the file path.
+			// Leading and trailing quotes are removed because the OS can't handle quoted paths.
 
-			StringViewUtil::Split(pCheatStr->ToChar(), ' ', arguments);
+			std::string_view path = StringViewUtil::TrimQuotes(StringViewUtil::RemoveLeft(view, kLoadZoneBitmapCheatString.size() + 1));
 
-			if (arguments.size() == 2)
+			if (!path.empty())
 			{
-				const std::string_view path = arguments[1];
+				cISC4AppPtr pSC4App;
 
-				if (!path.empty())
+				if (pSC4App)
 				{
-					cISC4AppPtr pSC4App;
+					cISC4City* pCity = pSC4App->GetCity();
+					cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+					cIGZCommandServerPtr pCommandServer;
 
-					if (pSC4App)
+					if (pCity && pCheatCodeManager && pCommandServer)
 					{
-						cISC4City* pCity = pSC4App->GetCity();
-						cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-						cIGZCommandServerPtr pCommandServer;
-
-						if (pCity && pCheatCodeManager && pCommandServer)
+						try
 						{
-							try
-							{
-								ZoneBitmapCheatListCommand zoneBitmapCommand(path);
+							ZoneBitmapCheatListCommand zoneBitmapCommand(path);
 
-								zoneBitmapCommand.Execute(pCity, pCheatCodeManager, pCommandServer);
-							}
-							catch (const std::exception& e)
-							{
-								ShowNotificationDialog(e.what());
-							}
+							zoneBitmapCommand.Execute(pCity, pCheatCodeManager, pCommandServer);
+						}
+						catch (const std::exception& e)
+						{
+							ShowNotificationDialog(e.what());
 						}
 					}
-				}
-				else
-				{
-					ShowNotificationDialog("The zone bitmap is an empty string.");
 				}
 			}
 			else

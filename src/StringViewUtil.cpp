@@ -103,6 +103,23 @@ void StringViewUtil::Split(
 	}
 }
 
+std::string_view StringViewUtil::RemoveLeft(const std::string_view& input, size_t prefixLength)
+{
+	std::string_view trimmed;
+
+	if (input.size() > prefixLength)
+	{
+		trimmed = input.substr(prefixLength);
+	}
+
+	return trimmed;
+}
+
+std::string_view StringViewUtil::TrimQuotes(const std::string_view& input)
+{
+	return boost::trim_copy_if(input, boost::is_any_of("\""));
+}
+
 std::string_view StringViewUtil::TrimWhiteSpace(const std::string_view& input)
 {
 	return boost::trim_copy(input);
