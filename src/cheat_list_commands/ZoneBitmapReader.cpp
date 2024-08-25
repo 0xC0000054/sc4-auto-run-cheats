@@ -47,10 +47,10 @@ struct ColorBgrx32
 
 	uint32_t ToRGBA() const
 	{
-		return 0xFF000000					// Opaque alpha.
-			| ((bgrx & 0x00FF0000) >> 16)	// Move red to the right.
-			| (bgrx & 0x0000FF00)			// Keep green in the same position.
-			| ((bgrx & 0x000000FF) << 16);	// Move blue to the left.
+		// Convert from 0xXXRRGGBB to 0xRRGGBBAA.
+		// Shift the red, green, and blue values to the right by 8 bits and add an opaque alpha value.
+
+		return ((bgrx & 0x00FFFFFF) << 8) | 0x000000FF;
 	}
 
 	bool operator ==(const ColorBgrx32& other) const
