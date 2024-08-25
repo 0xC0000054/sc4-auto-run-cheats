@@ -74,53 +74,6 @@ namespace
 
 		return path;
 	}
-
-	bool GetZoneManagerDefaultZoneColors(std::array<uint32_t, 16>& defaultZoneColors)
-	{
-		bool result = false;
-
-		cIGZPersistResourceManagerPtr pResourceManager;
-
-		if (pResourceManager)
-		{
-			// The TGI of the zone manager exemplar.
-			cGZPersistResourceKey key(0x6534284A, 0xE7E2C2DB, 0xE9482490);
-
-			cRZAutoRefCount<cISCPropertyHolder> propertyHolder;
-
-			if (pResourceManager->GetResource(
-				key,
-				GZIID_cISCPropertyHolder,
-				propertyHolder.AsPPVoid(),
-				0,
-				nullptr))
-			{
-				constexpr uint32_t kZoneDragColor = 0xE94825B8;
-
-				cISCProperty* pProperty = propertyHolder->GetProperty(kZoneDragColor);
-
-				if (pProperty)
-				{
-					cIGZVariant* pVariant = pProperty->GetPropertyValue();
-
-					if (pVariant
-						&& pVariant->GetType() == cIGZVariant::Uint32Array
-						&& pVariant->GetCount() == defaultZoneColors.size())
-					{
-						const uint32_t* pZoneColors = pVariant->RefUint32();
-
-						for (size_t i = 0; i < defaultZoneColors.size(); i++)
-						{
-							defaultZoneColors[i] = pZoneColors[i];
-						}
-						result = true;
-					}
-				}
-			}
-		}
-
-		return result;
-	}
 }
 
 ZoneBitmapCheatListCommand::ZoneBitmapCheatListCommand(const std::string_view& path)
@@ -185,38 +138,55 @@ void ZoneBitmapCheatListCommand::Execute(
 
 void ZoneBitmapCheatListCommand::WriteZoneManagerColorTextFile() const
 {
-	const std::filesystem::path textFilePath = GetZoneColorTextFilePath(bitmapPath);
-	std::array<uint32_t, 16> defaultZoneColors{};
-
-	if (GetZoneManagerDefaultZoneColors(defaultZoneColors))
+	static constexpr std::array<uint32_t, 16> MaxisDefaultZoneColors =
 	{
-		std::ofstream file(textFilePath, std::ofstream::out | std::ofstream::trunc);
+		// All colors are specified in 0xRRGGBBAA
+		0xFF0000FF, // Dezone
+		0x00C400FF, // Res. Low Density
+		0x009A00FF, // Res. Medium Density
+		0x007200FF, // Res. High Density
+		0x4F77FFFF, // Com. Low Density
+		0x2053FFFF, // Com. Medium Density
+		0x1420E2FF, // Com. High Density
+		0xFFDB32FF, // Ind. Low Density  (Resource/Agriculture/Farm)
+		0xFFB233FF, // Ind. Medium Density
+		0xCE901FFF, // Ind. High Density
+		0x00000000, // Military
+		0x00000000, // Airport
+		0x00000000, // Seaport
+		0x00000000, // Spaceport
+		0x00000000, // Landfill
+		0x00000000  // Plopped
+	};
 
-		if (file)
+	const std::filesystem::path textFilePath = GetZoneColorTextFilePath(bitmapPath);
+
+	std::ofstream file(textFilePath, std::ofstream::out | std::ofstream::trunc);
+
+	if (file)
+	{
+		file << "-----------------------------------\n";
+		file << "Zone Manager Zone Drag Colors\n";
+		file << "-----------------------------------\n";
+		file << '\n';
+		file << "If you want the Zone colors in the game to match those you used in your network layout BMP, download:\n";
+		file << "https://community.simtropolis.com/files/file/33590-scoty-zoning-mod/ and use the following two files:\n";
+		file << '\n';
+		file << "cori_ZM_tex_img2zones.dat\n";
+		file << "cori_ZManag_img2zones.dat\n";
+		file << '\n';
+		file << "Then in the second file, replace the \"Values as text\" in Zone Drag Color with the following:\n";
+
+		constexpr size_t lastItemIndex = MaxisDefaultZoneColors.size() - 1;
+
+		for (size_t i = 0; i < MaxisDefaultZoneColors.size(); i++)
 		{
-			file << "-----------------------------------\n";
-			file << "Zone Manager Zone Drag Colors\n";
-			file << "-----------------------------------\n";
-			file << '\n';
-			file << "If you want the Zone colors in the game to match those you used in your network layout BMP, download:\n";
-			file << "https://community.simtropolis.com/files/file/33590-scoty-zoning-mod/ and use the following two files:\n";
-			file << '\n';
-			file << "cori_ZM_tex_img2zones.dat\n";
-			file << "cori_ZManag_img2zones.dat\n";
-			file << '\n';
-			file << "Then in the second file, replace the \"Values as text\" in Zone Drag Color with the following:\n";
+			const auto entry = zoneInfo.zones.find(static_cast<cISC4ZoneManager::ZoneType>(i));
 
-			constexpr size_t lastItemIndex = defaultZoneColors.size() - 1;
+			const uint32_t value = entry != zoneInfo.zones.end() ? entry->second.zoneColorRGBA : MaxisDefaultZoneColors[i];
 
-			for (size_t i = 0; i < defaultZoneColors.size(); i++)
-			{
-				const auto entry = zoneInfo.zones.find(static_cast<cISC4ZoneManager::ZoneType>(i));
-
-				const uint32_t value = entry != zoneInfo.zones.end() ? entry->second.zoneColorRGBA : defaultZoneColors[i];
-
-				file << std::format("0x{0:08X}", value);
-				file << (i < lastItemIndex ? ',' : '\n');
-			}
+			file << std::format("0x{0:08X}", value);
+			file << (i < lastItemIndex ? ',' : '\n');
 		}
 	}
 }
