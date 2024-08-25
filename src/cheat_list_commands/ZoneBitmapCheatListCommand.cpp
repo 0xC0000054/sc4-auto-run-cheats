@@ -24,6 +24,7 @@
 #include "cISC4ZoneManager.h"
 #include "cRZAutoRefCount.h"
 #include "GZServPtrs.h"
+#include "Logger.h"
 #include <array>
 #include <filesystem>
 #include <format>
@@ -159,34 +160,53 @@ void ZoneBitmapCheatListCommand::WriteZoneManagerColorTextFile() const
 		0x00000000  // Plopped
 	};
 
-	const std::filesystem::path textFilePath = GetZoneColorTextFilePath(bitmapPath);
+	Logger& logger = Logger::GetInstance();
 
-	std::ofstream file(textFilePath, std::ofstream::out | std::ofstream::trunc);
-
-	if (file)
+	try
 	{
-		file << "-----------------------------------\n";
-		file << "Zone Manager Zone Drag Colors\n";
-		file << "-----------------------------------\n";
-		file << '\n';
-		file << "If you want the Zone colors in the game to match those you used in your network layout BMP, download:\n";
-		file << "https://community.simtropolis.com/files/file/33590-scoty-zoning-mod/ and use the following two files:\n";
-		file << '\n';
-		file << "cori_ZM_tex_img2zones.dat\n";
-		file << "cori_ZManag_img2zones.dat\n";
-		file << '\n';
-		file << "Then in the second file, replace the \"Values as text\" in Zone Drag Color with the following:\n";
+		const std::filesystem::path textFilePath = GetZoneColorTextFilePath(bitmapPath);
 
-		constexpr size_t lastItemIndex = MaxisDefaultZoneColors.size() - 1;
+		std::ofstream file(textFilePath, std::ofstream::out | std::ofstream::trunc);
 
-		for (size_t i = 0; i < MaxisDefaultZoneColors.size(); i++)
+		if (file)
 		{
-			const auto entry = zoneInfo.zones.find(static_cast<cISC4ZoneManager::ZoneType>(i));
+			file << "-----------------------------------\n";
+			file << "Zone Manager Zone Drag Colors\n";
+			file << "-----------------------------------\n";
+			file << '\n';
+			file << "If you want the Zone colors in the game to match those you used in your network layout BMP, download:\n";
+			file << "https://community.simtropolis.com/files/file/33590-scoty-zoning-mod/ and use the following two files:\n";
+			file << '\n';
+			file << "cori_ZM_tex_img2zones.dat\n";
+			file << "cori_ZManag_img2zones.dat\n";
+			file << '\n';
+			file << "Then in the second file, replace the \"Values as text\" in Zone Drag Color with the following:\n";
 
-			const uint32_t value = entry != zoneInfo.zones.end() ? entry->second.zoneColorRGBA : MaxisDefaultZoneColors[i];
+			constexpr size_t lastItemIndex = MaxisDefaultZoneColors.size() - 1;
 
-			file << std::format("0x{0:08X}", value);
-			file << (i < lastItemIndex ? ',' : '\n');
+			for (size_t i = 0; i < MaxisDefaultZoneColors.size(); i++)
+			{
+				const auto entry = zoneInfo.zones.find(static_cast<cISC4ZoneManager::ZoneType>(i));
+
+				const uint32_t value = entry != zoneInfo.zones.end() ? entry->second.zoneColorRGBA : MaxisDefaultZoneColors[i];
+
+				file << std::format("0x{0:08X}", value);
+				file << (i < lastItemIndex ? ',' : '\n');
+			}
 		}
+		else
+		{
+			logger.WriteLineFormatted(
+				LogLevel::Error,
+				"Failed to open the zone drag colors file: %s",
+				textFilePath.string().c_str());
+		}
+	}
+	catch (const std::exception& e)
+	{
+		logger.WriteLineFormatted(
+			LogLevel::Error,
+			"An error occurred when writing the zone drag colors file: %s",
+			e.what());
 	}
 }
