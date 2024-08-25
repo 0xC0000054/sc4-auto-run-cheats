@@ -33,6 +33,11 @@ cRZBaseString::cRZBaseString(char cChar, size_t dwRepetitions)
 	// Empty
 }
 
+cRZBaseString::cRZBaseString(std::string_view const& szSource)
+	: mnRefCount(0), szData(szSource.data(), szSource.size()) {
+	// Empty
+}
+
 cRZBaseString::cRZBaseString(std::string const& szSource)
 	: mnRefCount(0), szData(szSource) {
 	// Empty

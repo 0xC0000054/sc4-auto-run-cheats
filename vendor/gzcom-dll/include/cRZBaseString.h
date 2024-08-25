@@ -13,6 +13,7 @@ class cRZBaseString : public cIGZString
 		cRZBaseString(char const* pszSource);
 		cRZBaseString(char const* pszSource, size_t dwLen);
 		cRZBaseString(char cChar, size_t dwRepetitions);
+		cRZBaseString(std::string_view const& szSource);
 		cRZBaseString(std::string const& szSource);
 		cRZBaseString(size_t dwStartSize);
 		cRZBaseString(void);

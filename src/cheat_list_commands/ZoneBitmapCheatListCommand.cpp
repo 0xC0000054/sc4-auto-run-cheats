@@ -124,7 +124,7 @@ namespace
 }
 
 ZoneBitmapCheatListCommand::ZoneBitmapCheatListCommand(const std::string_view& path)
-	: bitmapPath(path.data(), path.size()),
+	: bitmapPath(path),
 	  zoneInfo(),
 	  bitmapRead(false)
 {

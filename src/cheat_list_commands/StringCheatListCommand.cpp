@@ -19,7 +19,7 @@
 #include <stdexcept>
 
 StringCheatListCommand::StringCheatListCommand(const std::string_view& view)
-	: command(view.data(), view.size())
+	: command(view)
 {
 }
 
