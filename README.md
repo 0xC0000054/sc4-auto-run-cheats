@@ -4,6 +4,14 @@ A DLL Plugin for SimCity 4 that automatically executes cheat codes when loading 
 
 The plugin can be downloaded from the Releases tab: https://github.com/0xC0000054/sc4-auto-run-cheats/releases
 
+## LoadZoneBitmap Cheat Code
+
+This cheat code allows the user to manually load a zone bitmap within the city view.
+The format is: `LoadZoneBitmap <path>`
+
+The command will be run before the cheat box is closed, if an error occurs an in-game message box will be shown.
+Depending on the number of zones in the bitmap it may take some time for the command to run.
+
 ## System Requirements
 
 * Windows 10 or later
@@ -93,6 +101,7 @@ See [LICENSE.txt](LICENSE.txt) for more information.
 
 [gzcom-dll](https://github.com/nsgomez/gzcom-dll/tree/master) Located in the vendor folder, MIT License.    
 [Windows Implementation Library](https://github.com/microsoft/wil) - MIT License    
+[SC4Fix](https://github.com/nsgomez/sc4fix) - MIT License    
 [Boost.Algorithm](https://www.boost.org/doc/libs/1_84_0/libs/algorithm/doc/html/index.html) - Boost Software License, Version 1.0.    
 [Boost.PropertyTree](https://www.boost.org/doc/libs/1_84_0/doc/html/property_tree.html) - Boost Software License, Version 1.0.
 

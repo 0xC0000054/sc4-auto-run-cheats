@@ -30,6 +30,8 @@
     <ClInclude Include="GZStringConvert.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SC4NotificationDialog.h" />
+    <ClInclude Include="SC4VersionDetection.h" />
     <ClInclude Include="StringViewUtil.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
@@ -37,6 +39,7 @@
     <ClCompile Include="..\vendor\gzcom-dll\src\cRZCellMap.cpp" />
     <ClCompile Include="..\vendor\gzcom-dll\src\cRZBaseString.cpp" />
     <ClCompile Include="..\vendor\gzcom-dll\src\cRZCOMDllDirector.cpp" />
+    <ClCompile Include="..\vendor\gzcom-dll\src\StringResourceManager.cpp" />
     <ClCompile Include="AutoRunCheatsDllDirector.cpp" />
     <ClCompile Include="cheat_list_commands\CheatListCommandFactory.cpp" />
     <ClCompile Include="cheat_list_commands\PlaceZoneCheatListCommand.cpp" />
@@ -46,6 +49,8 @@
     <ClCompile Include="cheat_list_commands\ZoneBitmapReader.cpp" />
     <ClCompile Include="GZStringConvert.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="SC4NotificationDialog.cpp" />
+    <ClCompile Include="SC4VersionDetection.cpp" />
     <ClCompile Include="StringViewUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -109,7 +114,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetPath)" "G:\GOG Galaxy\Games\SimCity 4 Deluxe Edition\Plugins" /y</Command>
@@ -138,7 +143,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetPath)" "G:\GOG Galaxy\Games\SimCity 4 Deluxe Edition\Plugins" /y</Command>

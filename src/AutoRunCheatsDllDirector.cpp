@@ -28,6 +28,8 @@
 #include "cRZBaseString.h"
 #include "cRZMessage2COMDirector.h"
 #include "GZServPtrs.h"
+#include "SC4NotificationDialog.h"
+#include "ZoneBitmapCheatListCommand.h"
 
 #include <boost/algorithm/string.hpp>
 #include "boost/property_tree/ptree.hpp"
@@ -42,11 +44,15 @@
 #include "wil/result.h"
 #include "wil/win32_helpers.h"
 
+static constexpr uint32_t kMessageCheatIssued = 0x230E27AC;
 static constexpr uint32_t kSC4MessagePostCityInitComplete = 0xEA8AE29A;
+static constexpr uint32_t kSC4MessagePostCityShutdown = 0x26D31EC3;
 static constexpr uint32_t kSC4MessageCityEstablished = 0x26D31EC4;
 static constexpr uint32_t kSC4MessagePostRegionInit = 0xCBB5BB45;
 
 static constexpr uint32_t kAutoRunCheatsDllDirector = 0x21E2B214;
+
+static constexpr uint32_t kLoadZoneBitmapCheatID = 0x5E9F8CFB;
 
 static constexpr std::string_view PluginConfigFileName = "SC4AutoRunCheats.ini";
 static constexpr std::string_view PluginLogFileName = "SC4AutoRunCheats.log";
@@ -147,6 +153,11 @@ namespace
 				Logger::GetInstance().WriteLine(LogLevel::Error, e.what());
 			}
 		}
+	}
+
+	void ShowNotificationDialog(const char* message)
+	{
+		SC4NotificationDialog::ShowDialog(cRZBaseString(message), cRZBaseString("SC4AutoRunCheats"));
 	}
 }
 
@@ -256,6 +267,9 @@ private:
 
 				if (pCheatCodeManager && pCommandServer)
 				{
+					pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString("LoadZoneBitmap"));
+					pCheatCodeManager->AddNotification2(this, 0);
+
 					ExecuteCheatList(
 						tileLoadCommands,
 						pCity,
@@ -294,17 +308,23 @@ private:
 							unestablishedTileLoadRunOnceCommands.clear();
 						}
 					}
-
-					if (tileLoadCommands.empty()
-						&& tileLoadRunOnceCommands.empty()
-						&& establishedTileLoadCommands.empty()
-						&& establishedTileLoadRunOnceCommands.empty()
-						&& unestablishedTileLoadCommands.empty()
-						&& unestablishedTileLoadRunOnceCommands.empty())
-					{
-						RemoveNotification(kSC4MessagePostCityInitComplete);
-					}
 				}
+			}
+		}
+	}
+
+	void PostCityShutdown()
+	{
+		cISC4AppPtr pSC4App;
+
+		if (pSC4App)
+		{
+			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+
+			if (pCheatCodeManager)
+			{
+				pCheatCodeManager->UnregisterCheatCode(kLoadZoneBitmapCheatID);
+				pCheatCodeManager->RemoveNotification2(this, 0);
 			}
 		}
 	}
@@ -329,17 +349,77 @@ private:
 		}
 	}
 
+	void ProcessCheatCode(cIGZMessage2Standard* pStandardMsg)
+	{
+		const uint32_t cheatID = static_cast<uint32_t>(pStandardMsg->GetData1());
+
+		if (cheatID == kLoadZoneBitmapCheatID)
+		{
+			const cIGZString* pCheatStr = static_cast<const cIGZString*>(pStandardMsg->GetVoid2());
+
+			std::vector<std::string_view> arguments;
+			arguments.reserve(2);
+
+			StringViewUtil::Split(pCheatStr->ToChar(), ' ', arguments);
+
+			if (arguments.size() == 2)
+			{
+				const std::string_view path = arguments[1];
+
+				if (!path.empty())
+				{
+					cISC4AppPtr pSC4App;
+
+					if (pSC4App)
+					{
+						cISC4City* pCity = pSC4App->GetCity();
+						cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
+						cIGZCommandServerPtr pCommandServer;
+
+						if (pCity && pCheatCodeManager && pCommandServer)
+						{
+							try
+							{
+								ZoneBitmapCheatListCommand zoneBitmapCommand(path);
+
+								zoneBitmapCommand.Execute(pCity, pCheatCodeManager, pCommandServer);
+							}
+							catch (const std::exception& e)
+							{
+								ShowNotificationDialog(e.what());
+							}
+						}
+					}
+				}
+				else
+				{
+					ShowNotificationDialog("The zone bitmap is an empty string.");
+				}
+			}
+			else
+			{
+				ShowNotificationDialog("Usage: LoadZoneBitmap <path>");
+			}
+		}
+	}
+
 	bool DoMessage(cIGZMessage2* pMsg)
 	{
 		cIGZMessage2Standard* pStandardMsg = static_cast<cIGZMessage2Standard*>(pMsg);
 
 		switch (pStandardMsg->GetType())
 		{
+		case kMessageCheatIssued:
+			ProcessCheatCode(pStandardMsg);
+			break;
 		case kSC4MessageCityEstablished:
 			CityEstablished(pStandardMsg);
 			break;
 		case kSC4MessagePostCityInitComplete:
 			PostCityInitComplete(pStandardMsg);
+			break;
+		case kSC4MessagePostCityShutdown:
+			PostCityShutdown();
 			break;
 		case kSC4MessagePostRegionInit:
 			PostRegionInit();
@@ -361,29 +441,18 @@ private:
 			if (pMS2)
 			{
 				std::set<uint32_t> requiredNotifications;
+				requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
+				requiredNotifications.emplace(kSC4MessagePostCityShutdown);
 
 				if (!appStartupCommands.empty())
 				{
 					requiredNotifications.emplace(kSC4MessagePostRegionInit);
 				}
 
-				if (!tileLoadCommands.empty()
-					|| !tileLoadRunOnceCommands.empty())
-				{
-					requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
-				}
-
 				if (!establishedTileLoadCommands.empty()
 					|| !establishedTileLoadRunOnceCommands.empty())
 				{
 					requiredNotifications.emplace(kSC4MessageCityEstablished);
-					requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
-				}
-
-				if (!unestablishedTileLoadCommands.empty()
-					|| !unestablishedTileLoadRunOnceCommands.empty())
-				{
-					requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
 				}
 
 				for (uint32_t messageID : requiredNotifications)
