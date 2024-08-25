@@ -11,8 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZCmdLine.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cGZBufferColorType.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cGZBufferType.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZBuffer.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cIGZFrameWork.h" />
+    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZGimexFactory.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cISC4ZoneManager.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cRZCellMap.h" />
     <ClInclude Include="..\vendor\gzcom-dll\include\cRZCOMDllDirector.h" />
@@ -20,7 +23,11 @@
     <ClInclude Include="cheat_list_commands\CheatListCommandFactory.h" />
     <ClInclude Include="cheat_list_commands\ICheatListCommand.h" />
     <ClInclude Include="cheat_list_commands\PlaceZoneCheatListCommand.h" />
+    <ClInclude Include="cheat_list_commands\PlaceZoneUtil.h" />
     <ClInclude Include="cheat_list_commands\StringCheatListCommand.h" />
+    <ClInclude Include="cheat_list_commands\ZoneBitmapCheatListCommand.h" />
+    <ClInclude Include="cheat_list_commands\ZoneBitmapReader.h" />
+    <ClInclude Include="GZStringConvert.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StringViewUtil.h" />
@@ -33,7 +40,11 @@
     <ClCompile Include="AutoRunCheatsDllDirector.cpp" />
     <ClCompile Include="cheat_list_commands\CheatListCommandFactory.cpp" />
     <ClCompile Include="cheat_list_commands\PlaceZoneCheatListCommand.cpp" />
+    <ClCompile Include="cheat_list_commands\PlaceZoneUtil.cpp" />
     <ClCompile Include="cheat_list_commands\StringCheatListCommand.cpp" />
+    <ClCompile Include="cheat_list_commands\ZoneBitmapCheatListCommand.cpp" />
+    <ClCompile Include="cheat_list_commands\ZoneBitmapReader.cpp" />
+    <ClCompile Include="GZStringConvert.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="StringViewUtil.cpp" />
   </ItemGroup>
@@ -85,7 +96,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;SC4SINGLECPU_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;SC4SINGLECPU_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
@@ -98,6 +109,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetPath)" "G:\GOG Galaxy\Games\SimCity 4 Deluxe Edition\Plugins" /y</Command>
@@ -109,7 +121,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;SC4SINGLECPU_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;SC4SINGLECPU_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
@@ -126,6 +138,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetPath)" "G:\GOG Galaxy\Games\SimCity 4 Deluxe Edition\Plugins" /y</Command>

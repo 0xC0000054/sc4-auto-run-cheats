@@ -12,32 +12,11 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "PlaceZoneCheatListCommand.h"
+#include "PlaceZoneUtil.h"
 #include "cISC4City.h"
 #include "cISC4ZoneManager.h"
 #include "SC4CellRegion.h"
 #include <stdexcept>
-
-namespace
-{
-	std::string GetErrorCodeString(int32_t errorCode)
-	{
-		switch (errorCode)
-		{
-		case 1:
-			return std::string("Insufficient funds");
-		case 2:
-			return std::string("Can't place zone on water.");
-		case 3:
-			return std::string("Zone size too small.");
-		case 4:
-			return std::string("Zone size too large.");
-		case 5:
-			return std::string("Can't replace existing objects.");
-		default:
-			return std::string("ErrorCode=").append(std::to_string(errorCode));
-		}
-	}
-}
 
 PlaceZoneCheatListCommand::PlaceZoneCheatListCommand(
 	cISC4ZoneManager::ZoneType zoneType,
@@ -99,7 +78,7 @@ void PlaceZoneCheatListCommand::Execute(
 
 			if (!result)
 			{
-				throw std::runtime_error(GetErrorCodeString(errorCode));
+				throw std::runtime_error(PlaceZoneUtil::GetErrorCodeDescription(errorCode));
 			}
 		}
 	}

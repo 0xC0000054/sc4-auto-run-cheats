@@ -53,6 +53,31 @@ You don't deserve it
 TerrainQuery
 ```
 
+### ZoneBitmap command
+
+The ZoneBitmap command can be used to load a zone bitmap that will be applied when loading a city.
+The command syntax is `ZoneBitmap <path>`.
+
+The required zone bitmap size varies depending on the city size. The zone bitmap is one row taller
+than the city tile because the last row is used to specify the colors for each zone and a few other options.
+
+Small city tile (4096 cells): 64x65    
+Medium city tile (16384 cells): 128x129    
+Large city tile (65536 cells): 256x257   
+
+The command will write a text file containing the zone colors in the same location as the image file.
+The color information can be used to create an override plugin for the Zone Manager's displayed zone colors.
+
+#### Control Row
+
+The last row in the zone bitmap is the control row. The first 16 pixels from the bottom left indicate which colors
+map to the game's 16 zone types. Currently only zone types 1 through 9 are usable.
+The next 3 pixels control various zone layout options, these options are enabled if the corresponding pixel is set
+to a RGB value of 255,165,0.
+
+Pixel 16 - Custom Size: Use a custom size for the zone grid. Equivalent to holding down Control when using the zoning tool.   
+Pixel 17 - Alternate Layout: Use an alternate layout when placing the zone grid. Equivalent to holding down Alt when using the zoning tool.   
+Pixel 18 - Place Streets: Place streets in the zoned areas. Equivalent to not pressing Shift when using the zoning tool.   
 
 ## Troubleshooting
 

@@ -13,6 +13,12 @@ public:
 	{
 	}
 
+	SC4CellRegion(T width, T height, bool initialValue)
+		: bounds(0, 0, width, height),
+		  cellMap(width, height, initialValue)
+	{
+	}
+
 	SC4CellRegion(SC4CellRegion const& other)
 		: bounds(other.bounds),
 		  cellMap(other.cellMap)

@@ -15,11 +15,15 @@
 #include "Logger.h"
 #include "PlaceZoneCheatListCommand.h"
 #include "StringCheatListCommand.h"
+#include "ZoneBitmapCheatListCommand.h"
 #include "StringViewUtil.h"
 #include <cstdarg>
 #include <stdexcept>
 
 using namespace std::string_view_literals;
+
+static constexpr std::string_view PlaceZoneStringView = "PlaceZone"sv;
+static constexpr std::string_view ZoneBitmapStringView = "ZoneBitmap"sv;
 
 namespace
 {
@@ -86,13 +90,36 @@ namespace
 			throw std::runtime_error("PlaceZone must have 5 arguments.");
 		}
 	}
+
+	std::unique_ptr<ICheatListCommand> CreateZoneBitmapCommand(const std::string_view& view)
+	{
+		// The command format is: ZoneBitmap <path>
+
+		std::string_view bitmapPath;
+
+		if (view.size() > (ZoneBitmapStringView.size() + 1))
+		{
+			bitmapPath = view.substr(ZoneBitmapStringView.size() + 1);
+		}
+
+		if (bitmapPath.empty())
+		{
+			throw std::runtime_error("ZoneBitmap must use the format: ZoneBitmap <path>");
+		}
+
+		return std::make_unique<ZoneBitmapCheatListCommand>(bitmapPath);
+	}
 }
 
 std::unique_ptr<ICheatListCommand> CheatListCommandFactory::Create(const std::string_view& view)
 {
-	if (StringViewUtil::StartsWithIgnoreCase(view, "PlaceZone"sv))
+	if (StringViewUtil::StartsWithIgnoreCase(view, PlaceZoneStringView))
 	{
 		return CreatePlaceZoneCommand(view);
+	}
+	else if (StringViewUtil::StartsWithIgnoreCase(view, ZoneBitmapStringView))
+	{
+		return CreateZoneBitmapCommand(view);
 	}
 
 	return std::make_unique<StringCheatListCommand>(view);

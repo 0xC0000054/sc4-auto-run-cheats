@@ -27,6 +27,7 @@ class cISC4Simulator;
 class cISC4TractDeveloper;
 class cISC4TrafficSimulator;
 class cISC4TutorialSystem;
+class cISC4ZoneDeveloper;
 class cISC4ZoneManager;
 
 class cISC4City : public cIGZUnknown
@@ -121,7 +122,7 @@ class cISC4City : public cIGZUnknown
 		virtual cISC4DisasterLayer* GetDisasterLayer(void) = 0;
 		virtual cISC4CivicBuildingSimulator* GetCivicBuildingSimulator(void) = 0;
 		virtual intptr_t GetParkManager(void) = 0;
-		virtual cISC4LotManager* GetZoneDeveloper(void) = 0;
+		virtual cISC4ZoneDeveloper* GetZoneDeveloper(void) = 0;
 		virtual intptr_t GetSeaportDeveloper(void) = 0;
 		virtual intptr_t GetAirportDeveloper(void) = 0;
 		virtual intptr_t GetLandfillDeveloper(void) = 0;
