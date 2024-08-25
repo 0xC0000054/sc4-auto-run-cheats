@@ -16,7 +16,7 @@
 #include "cIGZCommandParameterSet.h"
 #include "cIGZCommandServer.h"
 #include "cRZAutoRefCount.h"
-#include "Logger.h"
+#include <stdexcept>
 
 StringCheatListCommand::StringCheatListCommand(const std::string_view& view)
 	: command(view.data(), view.size())
@@ -63,10 +63,7 @@ void StringCheatListCommand::Execute(
 		}
 		else
 		{
-			Logger::GetInstance().WriteLineFormatted(
-				LogLevel::Error,
-				"Unknown cheat or command: %s",
-				command.ToChar());
+			throw std::runtime_error("Unknown cheat or command.");
 		}
 	}
 }

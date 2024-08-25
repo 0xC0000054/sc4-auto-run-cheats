@@ -14,8 +14,8 @@
 #include "PlaceZoneCheatListCommand.h"
 #include "cISC4City.h"
 #include "cISC4ZoneManager.h"
-#include "Logger.h"
 #include "SC4CellRegion.h"
+#include <stdexcept>
 
 namespace
 {
@@ -99,15 +99,7 @@ void PlaceZoneCheatListCommand::Execute(
 
 			if (!result)
 			{
-				Logger::GetInstance().WriteLineFormatted(
-					LogLevel::Error,
-					"PlaceZone %u %d %d %d %d failed: %s",
-					static_cast<uint32_t>(zoneType),
-					x1,
-					y1,
-					x2,
-					y2,
-					GetErrorCodeString(errorCode).c_str());
+				throw std::runtime_error(GetErrorCodeString(errorCode));
 			}
 		}
 	}
