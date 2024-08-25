@@ -94,13 +94,10 @@ namespace
 	std::unique_ptr<ICheatListCommand> CreateZoneBitmapCommand(const std::string_view& view)
 	{
 		// The command format is: ZoneBitmap <path>
+		// We strip the command name and the separator space to get the file path.
+		// Leading and trailing quotes are removed because the OS can't handle quoted paths.
 
-		std::string_view bitmapPath;
-
-		if (view.size() > (ZoneBitmapStringView.size() + 1))
-		{
-			bitmapPath = view.substr(ZoneBitmapStringView.size() + 1);
-		}
+		std::string_view bitmapPath = StringViewUtil::TrimQuotes(StringViewUtil::RemoveLeft(view, ZoneBitmapStringView.size() + 1));
 
 		if (bitmapPath.empty())
 		{
