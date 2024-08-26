@@ -185,6 +185,10 @@ ZoneInfo ZoneBitmapReader::Read(const cRZBaseString& path)
 			throw std::runtime_error("A large city tile image must have a width of 256 pixels and a height of 257 pixels.");
 		}
 	}
+	else
+	{
+		throw std::runtime_error("Unknown city tile size. Must be 64x65 (small), 128x129 (medium) or 256x257 (large).");
+	}
 
 	const uint8_t* pScan0 = static_cast<const uint8_t*>(pImage->GetColorSurfaceBits());
 	const uint32_t stride = pImage->GetColorSurfaceStride();
