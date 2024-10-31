@@ -24,7 +24,7 @@ public:
 	virtual void GetBufferArea(SC4Rect<int32_t>& rect) const = 0;
 	virtual uint32_t GetMemoryUsage() const = 0;
 
-	virtual cGZBufferColorType* GetColorType() const = 0;
+	virtual cGZBufferColorType GetColorType() const = 0;
 	virtual void GetColorType(cGZBufferColorType& colorType) const = 0;
 	virtual uint32_t GetBitsPerPixel() const = 0;
 	virtual uint32_t GetBytesPerPixel() const = 0;
@@ -46,15 +46,15 @@ public:
 	virtual bool Blt(cIGZBuffer* unknown1, SC4Rect<int32_t> const& unknown2, SC4Rect<int32_t> const& unknown3, SC4Rect<int32_t> const& unknown4) = 0;
 
 	virtual uint32_t ConvertRGBValueToNative(uint8_t red, uint8_t green, uint8_t blue) = 0;
-	virtual bool ConvertNativeValueToRGB(uint32_t value, uint8_t* outRed, uint8_t* outGreen, uint8_t* outBlue) = 0;
+	virtual bool ConvertNativeValueToRGB(uint32_t value, uint8_t& outRed, uint8_t& outGreen, uint8_t& outBlue) = 0;
 	virtual uint32_t ConvertRGBAValueToNative(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) = 0;
-	virtual bool ConvertNativeValueToRGBA(uint32_t value, uint8_t* outRed, uint8_t* outGreen, uint8_t* outBlue, uint8_t* outAlpha) = 0;
+	virtual bool ConvertNativeValueToRGBA(uint32_t value, uint8_t& outRed, uint8_t& outGreen, uint8_t& outBlue, uint8_t& outAlpha) = 0;
 
 	virtual void* GetColorSurfaceBits() = 0;
 	virtual uint32_t GetColorSurfaceStride() = 0;
 
 	virtual uint32_t GetChangeCounter() = 0;
 	virtual cIGZBufferHardwareCache* GetHardwareCache() = 0;
-	virtual bool SetHardwareCache(cIGZBufferHardwareCache* unknown1) = 0;
+	virtual bool SetHardwareCache(cIGZBufferHardwareCache* cache) = 0;
 	virtual bool IsReady() = 0;
 };
