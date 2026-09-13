@@ -20,8 +20,8 @@
  */
 
 #include "ZoneBitmapCheatListCommand.h"
-#include "GZStringConvert.h"
 #include "PlaceZoneUtil.h"
+#include "StringConversion.h"
 #include "cGZPersistResourceKey.h"
 #include "cIGZPersistResourceManager.h"
 #include "cIGZVariant.h"
@@ -72,7 +72,7 @@ namespace
 {
 	std::filesystem::path GetZoneColorTextFilePath(const cRZBaseString& bitmapPath)
 	{
-		std::filesystem::path path = GZStringConvert::ToFileSystemPath(bitmapPath);
+		std::filesystem::path path = StringConversion::ToUtf16(bitmapPath);
 
 		// Remove the file extension and append our text file name.
 		// We keep the image file name in case the user has multiple

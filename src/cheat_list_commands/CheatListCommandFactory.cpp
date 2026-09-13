@@ -63,28 +63,28 @@ namespace
 				throw std::runtime_error("Failed to parse the first PlaceZone argument (zone type).");
 			}
 
-			long x1 = 0;
+			int32_t x1 = 0;
 
 			if (!StringViewUtil::TryParse(arguments[2], x1))
 			{
 				throw std::runtime_error("Failed to parse the second PlaceZone argument (x1).");
 			}
 
-			long y1 = 0;
+			int32_t y1 = 0;
 
 			if (!StringViewUtil::TryParse(arguments[3], y1))
 			{
 				throw std::runtime_error("Failed to parse the third PlaceZone argument (y1).");
 			}
 
-			long x2 = 0;
+			int32_t x2 = 0;
 
 			if (!StringViewUtil::TryParse(arguments[4], x2))
 			{
 				throw std::runtime_error("Failed to parse the fourth PlaceZone argument (x2).");
 			}
 
-			long y2 = 0;
+			int32_t y2 = 0;
 
 			if (!StringViewUtil::TryParse(arguments[5], y2))
 			{
@@ -105,7 +105,16 @@ namespace
 		// We strip the command name and the separator space to get the file path.
 		// Leading and trailing quotes are removed because the OS can't handle quoted paths.
 
-		std::string_view bitmapPath = StringViewUtil::TrimQuotes(StringViewUtil::RemoveLeft(view, ZoneBitmapStringView.size() + 1));
+		std::string_view bitmapPath;
+
+		constexpr size_t pathStartIndex = ZoneBitmapStringView.size() + 1;
+
+		if (view.size() > pathStartIndex)
+		{
+			const std::string_view pathWithoutCommandName = view.substr(pathStartIndex);
+
+			bitmapPath = StringViewUtil::Trim(pathWithoutCommandName, [](char a) { return a != '"'; });
+		}
 
 		if (bitmapPath.empty())
 		{

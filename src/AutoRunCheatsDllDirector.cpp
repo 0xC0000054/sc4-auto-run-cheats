@@ -35,22 +35,15 @@
 #include "cRZAutoRefCount.h"
 #include "cRZBaseString.h"
 #include "cRZMessage2COMDirector.h"
+#include "FileSystem.h"
 #include "GZServPtrs.h"
+#include "IniReader.h"
 #include "SC4NotificationDialog.h"
 #include "ZoneBitmapCheatListCommand.h"
-
-#include <boost/algorithm/string.hpp>
-#include "boost/property_tree/ptree.hpp"
-#include "boost/property_tree/ini_parser.hpp"
 
 #include <set>
 #include <string>
 #include <vector>
-
-#include <Windows.h>
-#include "wil/resource.h"
-#include "wil/result.h"
-#include "wil/win32_helpers.h"
 
 static constexpr uint32_t kMessageCheatIssued = 0x230E27AC;
 static constexpr uint32_t kSC4MessagePostCityInitComplete = 0xEA8AE29A;
@@ -70,15 +63,6 @@ using namespace std::literals::string_view_literals; // Required for the sv suff
 
 namespace
 {
-	std::filesystem::path GetDllFolderPath()
-	{
-		wil::unique_cotaskmem_string modulePath = wil::GetModuleFileNameW(wil::GetModuleInstanceHandle());
-
-		std::filesystem::path temp(modulePath.get());
-
-		return temp.parent_path();
-	}
-
 	void ExecuteCheatList(
 		const std::vector<std::unique_ptr<ICheatListCommand>>& cheats,
 		cISC4City* pCity,
@@ -151,7 +135,7 @@ namespace
 					for (const auto& command : commands)
 					{
 						// Trim any leading or trailing white space from the string.
-						const std::string_view trimmedCommand = StringViewUtil::TrimWhiteSpace(command);
+						const std::string_view trimmedCommand = StringViewUtil::Trim(command);
 
 						output.push_back(CheatListCommandFactory::Create(trimmedCommand));
 					}
@@ -176,16 +160,7 @@ public:
 
 	AutoRunCheatsDllDirector()
 	{
-		std::filesystem::path dllFolderPath = GetDllFolderPath();
-
-		configFilePath = dllFolderPath;
-		configFilePath /= PluginConfigFileName;
-
-		std::filesystem::path logFilePath = dllFolderPath;
-		logFilePath /= PluginLogFileName;
-
 		Logger& logger = Logger::GetInstance();
-		logger.Init(logFilePath, LogLevel::Error);
 		logger.WriteLogFileHeader("SC4AutoRunCheats v" PLUGIN_VERSION_STR);
 	}
 
@@ -371,7 +346,16 @@ private:
 			// We strip the cheat name and the separator space to get the file path.
 			// Leading and trailing quotes are removed because the OS can't handle quoted paths.
 
-			std::string_view path = StringViewUtil::TrimQuotes(StringViewUtil::RemoveLeft(view, kLoadZoneBitmapCheatString.size() + 1));
+			std::string_view path;
+
+			constexpr size_t pathStartIndex = kLoadZoneBitmapCheatString.size() + 1;
+
+			if (view.size() > pathStartIndex)
+			{
+				const std::string_view pathWithoutCheatName = view.substr(pathStartIndex);
+
+				path = StringViewUtil::Trim(pathWithoutCheatName, [](char a) { return a != '"'; });
+			}
 
 			if (!path.empty())
 			{
@@ -483,24 +467,27 @@ private:
 
 		try
 		{
-			std::ifstream stream(configFilePath, std::ifstream::in);
+			std::ifstream stream(FileSystem::GetDllIniFilePath(), std::ifstream::in);
 
 			if (!stream)
 			{
 				throw std::runtime_error("Failed to open the settings file.");
 			}
 
-			boost::property_tree::ptree tree;
+			IniReader reader(stream);
 
-			boost::property_tree::ini_parser::read_ini(stream, tree);
+			const IniSection& startupSection = reader.get_section("Startup");
+			const IniSection& tileSection = reader.get_section("Tile");
+			const IniSection& establishedTileSection = reader.get_section("EstablishedTile");
+			const IniSection& unestablishedTileSection = reader.get_section("UnestablishedTile");
 
-			ParseCommandString(tree.get<std::string>("Startup.CommandList"), appStartupCommands);
-			ParseCommandString(tree.get<std::string>("Tile.CommandList"), tileLoadCommands);
-			ParseCommandString(tree.get<std::string>("Tile.RunOnceCommandList"), tileLoadRunOnceCommands);
-			ParseCommandString(tree.get<std::string>("EstablishedTile.CommandList"), establishedTileLoadCommands);
-			ParseCommandString(tree.get<std::string>("EstablishedTile.RunOnceCommandList"), establishedTileLoadRunOnceCommands);
-			ParseCommandString(tree.get<std::string>("UnestablishedTile.CommandList"), unestablishedTileLoadCommands);
-			ParseCommandString(tree.get<std::string>("UnestablishedTile.RunOnceCommandList"), unestablishedTileLoadRunOnceCommands);
+			ParseCommandString(startupSection.get_value("CommandList"), appStartupCommands);
+			ParseCommandString(tileSection.get_value("CommandList"), tileLoadCommands);
+			ParseCommandString(tileSection.get_value("RunOnceCommandList"), tileLoadRunOnceCommands);
+			ParseCommandString(establishedTileSection.get_value("CommandList"), establishedTileLoadCommands);
+			ParseCommandString(establishedTileSection.get_value("RunOnceCommandList"), establishedTileLoadRunOnceCommands);
+			ParseCommandString(unestablishedTileSection.get_value("CommandList"), unestablishedTileLoadCommands);
+			ParseCommandString(unestablishedTileSection.get_value("RunOnceCommandList"), unestablishedTileLoadRunOnceCommands);
 			result = true;
 		}
 		catch (const std::exception& e)
@@ -524,7 +511,6 @@ private:
 		}
 	}
 
-	std::filesystem::path configFilePath;
 	std::vector<std::unique_ptr<ICheatListCommand>> appStartupCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadRunOnceCommands;
