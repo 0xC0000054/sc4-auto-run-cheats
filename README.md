@@ -94,7 +94,7 @@ The log contains status information for the most recent run of the plugin.
 
 # License
 
-This project is licensed under the terms of the MIT License.    
+This project is licensed under the terms of the GNU Lesser General Public License version 2.1 or (at your option) any later version published by the Free Software Foundation.    
 See [LICENSE.txt](LICENSE.txt) for more information.
 
 ## 3rd party code

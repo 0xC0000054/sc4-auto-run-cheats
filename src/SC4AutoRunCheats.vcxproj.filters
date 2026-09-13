@@ -90,6 +90,12 @@
     <ClInclude Include="cheat_list_commands\ZoneBitmapCheatListCommand.h">
       <Filter>Header Files\cheat-list-commands</Filter>
     </ClInclude>
+    <ClInclude Include="SC4NotificationDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SC4VersionDetection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logger.cpp">
@@ -130,6 +136,15 @@
     </ClCompile>
     <ClCompile Include="cheat_list_commands\ZoneBitmapCheatListCommand.cpp">
       <Filter>Source Files\cheat-list-commands</Filter>
+    </ClCompile>
+    <ClCompile Include="SC4NotificationDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SC4VersionDetection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\gzcom-dll\src\StringResourceManager.cpp">
+      <Filter>Source Files\GZCOM</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
