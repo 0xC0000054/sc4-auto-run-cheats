@@ -33,10 +33,10 @@
     <ClInclude Include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZFrameWork.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cIGZFrameWork.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cRZCOMDllDirector.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cRZCOMDllDirector.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -45,10 +45,10 @@
     <ClInclude Include="StringViewUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\SC4CellRegion.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\SC4CellRegion.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cRZCellMap.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cRZCellMap.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
     <ClInclude Include="cheat_list_commands\ICheatListCommand.h">
@@ -63,7 +63,7 @@
     <ClInclude Include="cheat_list_commands\PlaceZoneCheatListCommand.h">
       <Filter>Header Files\cheat-list-commands</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cISC4ZoneManager.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cISC4ZoneManager.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
     <ClInclude Include="cheat_list_commands\ZoneBitmapReader.h">
@@ -72,16 +72,16 @@
     <ClInclude Include="cheat_list_commands\PlaceZoneUtil.h">
       <Filter>Header Files\cheat-list-commands</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZBuffer.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cIGZBuffer.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cGZBufferType.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cGZBufferType.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cGZBufferColorType.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cGZBufferColorType.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
-    <ClInclude Include="..\vendor\gzcom-dll\include\cIGZGimexFactory.h">
+    <ClInclude Include="..\vendor\gzcom-dll\gzcom-dll\include\cIGZGimexFactory.h">
       <Filter>Header Files\GZCOM</Filter>
     </ClInclude>
     <ClInclude Include="GZStringConvert.h">
@@ -101,10 +101,10 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vendor\gzcom-dll\src\cRZCOMDllDirector.cpp">
+    <ClCompile Include="..\vendor\gzcom-dll\gzcom-dll\src\cRZCOMDllDirector.cpp">
       <Filter>Source Files\GZCOM</Filter>
     </ClCompile>
-    <ClCompile Include="..\vendor\gzcom-dll\src\cRZBaseString.cpp">
+    <ClCompile Include="..\vendor\gzcom-dll\gzcom-dll\src\cRZBaseString.cpp">
       <Filter>Source Files\GZCOM</Filter>
     </ClCompile>
     <ClCompile Include="AutoRunCheatsDllDirector.cpp">
@@ -113,7 +113,7 @@
     <ClCompile Include="StringViewUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vendor\gzcom-dll\src\cRZCellMap.cpp">
+    <ClCompile Include="..\vendor\gzcom-dll\gzcom-dll\src\cRZCellMap.cpp">
       <Filter>Source Files\GZCOM</Filter>
     </ClCompile>
     <ClCompile Include="cheat_list_commands\PlaceZoneCheatListCommand.cpp">
@@ -143,7 +143,7 @@
     <ClCompile Include="SC4VersionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vendor\gzcom-dll\src\StringResourceManager.cpp">
+    <ClCompile Include="..\vendor\gzcom-dll\gzcom-dll\src\StringResourceManager.cpp">
       <Filter>Source Files\GZCOM</Filter>
     </ClCompile>
   </ItemGroup>

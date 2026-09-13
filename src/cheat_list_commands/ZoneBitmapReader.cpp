@@ -164,7 +164,7 @@ ZoneInfo ZoneBitmapReader::Read(const cRZBaseString& path)
 
 	// Load the image into a 32-bit BGRA buffer, SC4 doesn't have a 24-bit buffer format.
 
-	if (!pGimexFactory->LoadFromFile(path, pImage.AsPPObj(), cGZBufferType::ThirtyTwoBitBgra))
+	if (!pGimexFactory->LoadFromFile(path, pImage.AsPPObj(), cGZBufferColorType::A8R8G8B8))
 	{
 		throw std::runtime_error("Failed to load the zone bitmap image.");
 	}
