@@ -46,6 +46,7 @@
 #include <vector>
 
 static constexpr uint32_t kMessageCheatIssued = 0x230E27AC;
+static constexpr uint32_t kSC4MessagePostCityInit = 0x26D31EC1;
 static constexpr uint32_t kSC4MessagePostCityInitComplete = 0xEA8AE29A;
 static constexpr uint32_t kSC4MessagePostCityShutdown = 0x26D31EC3;
 static constexpr uint32_t kSC4MessageCityEstablished = 0x26D31EC4;
@@ -227,6 +228,15 @@ private:
 		}
 	}
 
+	void PostCityInit()
+	{
+		if (pCheatCodeManager)
+		{
+			pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
+			pCheatCodeManager->AddNotification2(this, 0);
+		}
+	}
+
 	void PostCityInitComplete(cIGZMessage2Standard* pStandardMsg)
 	{
 		cISC4City* pCity = static_cast<cISC4City*>(pStandardMsg->GetVoid1());
@@ -237,9 +247,6 @@ private:
 
 			if (pCheatCodeManager && pCommandServer)
 			{
-				pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
-				pCheatCodeManager->AddNotification2(this, 0);
-
 				ExecuteCheatList(
 					tileLoadCommands,
 					pCity,
@@ -372,6 +379,9 @@ private:
 		case kSC4MessageCityEstablished:
 			CityEstablished(pStandardMsg);
 			break;
+		case kSC4MessagePostCityInit:
+			PostCityInit();
+			break;
 		case kSC4MessagePostCityInitComplete:
 			PostCityInitComplete(pStandardMsg);
 			break;
@@ -405,7 +415,7 @@ private:
 			if (pMS2)
 			{
 				std::set<uint32_t> requiredNotifications;
-				requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
+				requiredNotifications.emplace(kSC4MessagePostCityInit);
 				requiredNotifications.emplace(kSC4MessagePostCityShutdown);
 
 				if (!appStartupCommands.empty())
@@ -413,10 +423,19 @@ private:
 					requiredNotifications.emplace(kSC4MessagePostRegionInit);
 				}
 
+				if (!tileLoadCommands.empty()
+					|| !tileLoadRunOnceCommands.empty()
+					|| !unestablishedTileLoadCommands.empty()
+					|| !unestablishedTileLoadRunOnceCommands.empty())
+				{
+					requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
+				}
+
 				if (!establishedTileLoadCommands.empty()
 					|| !establishedTileLoadRunOnceCommands.empty())
 				{
 					requiredNotifications.emplace(kSC4MessageCityEstablished);
+					requiredNotifications.emplace(kSC4MessagePostCityInitComplete);
 				}
 
 				for (uint32_t messageID : requiredNotifications)
