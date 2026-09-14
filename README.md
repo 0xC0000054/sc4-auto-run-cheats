@@ -12,6 +12,26 @@ The format is: `LoadZoneBitmap <path>`
 The command will be run before the cheat box is closed, if an error occurs an in-game message box will be shown.
 Depending on the number of zones in the bitmap it may take some time for the command to run.
 
+## TerrainAdjustHeight Cheat Code
+
+This cheat code allows the city's global terrain height to be raised or lowered by a specified number of meters.
+
+The built-in _Raise Terrain Level_ and _Lower Terrain Level_ buttons perform the same actions using a fixed number of meters per click, 40 meters in the base
+game but mods may change it to something else.
+The value the _Raise Terrain Level_ and _Lower Terrain Level_ buttons use is controlled by the Terrain tuning exemplar's _TerrainRaiseLowerAmount_ property
+(property id 0x48CD7B73).
+
+The syntax is: `TerrainAdjustHeight <mode> <amount>` 
+
+The _mode_ parameter must be one of the following values:
+
+| Mode | Alias | Description |
+|------|-------|-------------|
+| raise | + | Raises the terrain. |
+| lower | - | Lowers the terrain. |
+
+The _amount_ parameter specifies the number of meters to adjust the terrain, it must be a positive float32 value.
+
 ## System Requirements
 
 * Windows 10 or later

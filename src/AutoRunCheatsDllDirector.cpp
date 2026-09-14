@@ -32,6 +32,7 @@
 #include "cIGZMessageServer2.h"
 #include "cISC4App.h"
 #include "cISC4City.h"
+#include "cISTETerrain.h"
 #include "cRZAutoRefCount.h"
 #include "cRZBaseString.h"
 #include "cRZMessage2COMDirector.h"
@@ -56,6 +57,8 @@ static constexpr uint32_t kAutoRunCheatsDllDirector = 0x21E2B214;
 
 static constexpr uint32_t kLoadZoneBitmapCheatID = 0x5E9F8CFB;
 static constexpr std::string_view kLoadZoneBitmapCheatString = "LoadZoneBitmap";
+static constexpr uint32_t kTerrainAdjustHeightCheatID = 0x6BB681C7;
+static constexpr std::string_view kTerrainAdjustHeightCheatString = "TerrainAdjustHeight";
 
 using namespace std::literals::string_view_literals; // Required for the sv suffix
 
@@ -150,13 +153,42 @@ namespace
 	{
 		SC4NotificationDialog::ShowDialog(cRZBaseString(message), cRZBaseString("SC4AutoRunCheats"));
 	}
+
+	bool TryParseTerrainAdjustHeightCheatModeArgument(const std::string_view& mode, bool& raiseTerrain)
+	{
+		if (mode.length() == 1)
+		{
+			switch (mode[0])
+			{
+			case '+':
+				raiseTerrain = true;
+				return true;
+			case '-':
+				raiseTerrain = false;
+				return true;
+			}
+		}
+		else if (StringViewUtil::EqualsIgnoreCase(mode, "raise"sv))
+		{
+			raiseTerrain = true;
+			return true;
+		}
+		else if (StringViewUtil::EqualsIgnoreCase(mode, "lower"sv))
+		{
+			raiseTerrain = false;
+			return true;
+		}
+
+		raiseTerrain = false;
+		return false;
+	}
 }
 
 class AutoRunCheatsDllDirector final : public cRZMessage2COMDirector
 {
 public:
 
-	AutoRunCheatsDllDirector() : pCheatCodeManager(nullptr)
+	AutoRunCheatsDllDirector() : pCheatCodeManager(nullptr), pCity(nullptr)
 	{
 		Logger& logger = Logger::GetInstance();
 		logger.WriteLogFileHeader("SC4AutoRunCheats v" PLUGIN_VERSION_STR);
@@ -228,19 +260,20 @@ private:
 		}
 	}
 
-	void PostCityInit()
+	void PostCityInit(cIGZMessage2Standard* pStandardMsg)
 	{
+		pCity = static_cast<cISC4City*>(pStandardMsg->GetVoid1());
+
 		if (pCheatCodeManager)
 		{
 			pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
+			pCheatCodeManager->RegisterCheatCode(kTerrainAdjustHeightCheatID, cRZBaseString(kTerrainAdjustHeightCheatString));
 			pCheatCodeManager->AddNotification2(this, 0);
 		}
 	}
 
-	void PostCityInitComplete(cIGZMessage2Standard* pStandardMsg)
+	void PostCityInitComplete()
 	{
-		cISC4City* pCity = static_cast<cISC4City*>(pStandardMsg->GetVoid1());
-
 		if (pCity)
 		{
 			cIGZCommandServerPtr pCommandServer;
@@ -291,9 +324,11 @@ private:
 
 	void PostCityShutdown()
 	{
+		pCity = nullptr;
 		if (pCheatCodeManager)
 		{
 			pCheatCodeManager->UnregisterCheatCode(kLoadZoneBitmapCheatID);
+			pCheatCodeManager->UnregisterCheatCode(kTerrainAdjustHeightCheatID);
 			pCheatCodeManager->RemoveNotification2(this, 0);
 		}
 	}
@@ -338,31 +373,58 @@ private:
 
 			if (!path.empty())
 			{
-				cISC4AppPtr pSC4App;
+				cIGZCommandServerPtr pCommandServer;
 
-				if (pSC4App)
+				if (pCity && pCheatCodeManager && pCommandServer)
 				{
-					cISC4City* pCity = pSC4App->GetCity();
-					cIGZCommandServerPtr pCommandServer;
-
-					if (pCity && pCheatCodeManager && pCommandServer)
+					try
 					{
-						try
-						{
-							ZoneBitmapCheatListCommand zoneBitmapCommand(path);
+						ZoneBitmapCheatListCommand zoneBitmapCommand(path);
 
-							zoneBitmapCommand.Execute(pCity, pCheatCodeManager, pCommandServer);
-						}
-						catch (const std::exception& e)
-						{
-							ShowNotificationDialog(e.what());
-						}
+						zoneBitmapCommand.Execute(pCity, pCheatCodeManager, pCommandServer);
+					}
+					catch (const std::exception& e)
+					{
+						ShowNotificationDialog(e.what());
 					}
 				}
 			}
 			else
 			{
 				ShowNotificationDialog("Usage: LoadZoneBitmap <path>");
+			}
+		}
+		else if (cheatID == kTerrainAdjustHeightCheatID)
+		{
+			const cIGZString* pCheatStr = static_cast<const cIGZString*>(pStandardMsg->GetVoid2());
+			const std::string_view view(pCheatStr->ToChar(), pCheatStr->Strlen());
+
+			std::vector<std::string_view> arguments;
+			arguments.reserve(3);
+
+			StringViewUtil::Split(view, ' ', arguments);
+
+			bool raise = false;
+			float amount = 0.0f;
+
+			if (arguments.size() == 3
+				&& TryParseTerrainAdjustHeightCheatModeArgument(arguments[1], raise)
+				&& StringViewUtil::TryParse(arguments[2], amount)
+				&& amount > 0)
+			{
+				if (pCity)
+				{
+					cISTETerrain* pTerrain = pCity->GetTerrain();
+
+					if (pTerrain)
+					{
+						pTerrain->ChangeTerrainLevel(raise, amount);
+					}
+				}
+			}
+			else
+			{
+				ShowNotificationDialog("Usage: TerrainAdjustHeight <raise/lower> <amount float32>");
 			}
 		}
 	}
@@ -380,10 +442,10 @@ private:
 			CityEstablished(pStandardMsg);
 			break;
 		case kSC4MessagePostCityInit:
-			PostCityInit();
+			PostCityInit(pStandardMsg);
 			break;
 		case kSC4MessagePostCityInitComplete:
-			PostCityInitComplete(pStandardMsg);
+			PostCityInitComplete();
 			break;
 		case kSC4MessagePostCityShutdown:
 			PostCityShutdown();
@@ -509,6 +571,7 @@ private:
 	}
 
 	cIGZCheatCodeManager* pCheatCodeManager;
+	cISC4City* pCity;
 	std::vector<std::unique_ptr<ICheatListCommand>> appStartupCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadRunOnceCommands;
