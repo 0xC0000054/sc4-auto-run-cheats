@@ -155,7 +155,7 @@ class AutoRunCheatsDllDirector final : public cRZMessage2COMDirector
 {
 public:
 
-	AutoRunCheatsDllDirector()
+	AutoRunCheatsDllDirector() : pCheatCodeManager(nullptr)
 	{
 		Logger& logger = Logger::GetInstance();
 		logger.WriteLogFileHeader("SC4AutoRunCheats v" PLUGIN_VERSION_STR);
@@ -212,22 +212,16 @@ private:
 
 		if (pCity)
 		{
-			cISC4AppPtr pSC4App;
+			cIGZCommandServerPtr pCommandServer;
 
-			if (pSC4App)
+			if (pCheatCodeManager && pCommandServer)
 			{
-				cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-				cIGZCommandServerPtr pCommandServer;
+				ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
 
-				if (pCheatCodeManager && pCommandServer)
+				if (establishedTileLoadCommands.empty()
+					&& establishedTileLoadRunOnceCommands.empty())
 				{
-					ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
-
-					if (establishedTileLoadCommands.empty()
-						&& establishedTileLoadRunOnceCommands.empty())
-					{
-						RemoveNotification(kSC4MessageCityEstablished);
-					}
+					RemoveNotification(kSC4MessageCityEstablished);
 				}
 			}
 		}
@@ -239,55 +233,49 @@ private:
 
 		if (pCity)
 		{
-			cISC4AppPtr pSC4App;
+			cIGZCommandServerPtr pCommandServer;
 
-			if (pSC4App)
+			if (pCheatCodeManager && pCommandServer)
 			{
-				cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-				cIGZCommandServerPtr pCommandServer;
+				pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
+				pCheatCodeManager->AddNotification2(this, 0);
 
-				if (pCheatCodeManager && pCommandServer)
+				ExecuteCheatList(
+					tileLoadCommands,
+					pCity,
+					pCheatCodeManager,
+					pCommandServer);
+
+				if (!tileLoadRunOnceCommands.empty())
 				{
-					pCheatCodeManager->RegisterCheatCode(kLoadZoneBitmapCheatID, cRZBaseString(kLoadZoneBitmapCheatString));
-					pCheatCodeManager->AddNotification2(this, 0);
-
 					ExecuteCheatList(
-						tileLoadCommands,
+						tileLoadRunOnceCommands,
+						pCity,
+						pCheatCodeManager,
+						pCommandServer);
+					tileLoadRunOnceCommands.clear();
+				}
+
+				if (pCity->GetEstablished())
+				{
+					ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
+				}
+				else
+				{
+					ExecuteCheatList(
+						unestablishedTileLoadCommands,
 						pCity,
 						pCheatCodeManager,
 						pCommandServer);
 
-					if (!tileLoadRunOnceCommands.empty())
+					if (!unestablishedTileLoadRunOnceCommands.empty())
 					{
 						ExecuteCheatList(
-							tileLoadRunOnceCommands,
+							unestablishedTileLoadRunOnceCommands,
 							pCity,
 							pCheatCodeManager,
 							pCommandServer);
-						tileLoadRunOnceCommands.clear();
-					}
-
-					if (pCity->GetEstablished())
-					{
-						ExecuteEstablishedCityCommands(pCity, pCheatCodeManager, pCommandServer);
-					}
-					else
-					{
-						ExecuteCheatList(
-							unestablishedTileLoadCommands,
-							pCity,
-							pCheatCodeManager,
-							pCommandServer);
-
-						if (!unestablishedTileLoadRunOnceCommands.empty())
-						{
-							ExecuteCheatList(
-								unestablishedTileLoadRunOnceCommands,
-								pCity,
-								pCheatCodeManager,
-								pCommandServer);
-							unestablishedTileLoadRunOnceCommands.clear();
-						}
+						unestablishedTileLoadRunOnceCommands.clear();
 					}
 				}
 			}
@@ -296,37 +284,24 @@ private:
 
 	void PostCityShutdown()
 	{
-		cISC4AppPtr pSC4App;
-
-		if (pSC4App)
+		if (pCheatCodeManager)
 		{
-			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-
-			if (pCheatCodeManager)
-			{
-				pCheatCodeManager->UnregisterCheatCode(kLoadZoneBitmapCheatID);
-				pCheatCodeManager->RemoveNotification2(this, 0);
-			}
+			pCheatCodeManager->UnregisterCheatCode(kLoadZoneBitmapCheatID);
+			pCheatCodeManager->RemoveNotification2(this, 0);
 		}
 	}
 
 	void PostRegionInit()
 	{
-		cISC4AppPtr pSC4App;
+		cIGZCommandServerPtr pCommandServer;
 
-		if (pSC4App)
+		if (pCheatCodeManager && pCommandServer)
 		{
-			cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
-			cIGZCommandServerPtr pCommandServer;
+			ExecuteCheatList(appStartupCommands, nullptr, pCheatCodeManager, pCommandServer);
 
-			if (pCheatCodeManager && pCommandServer)
-			{
-				ExecuteCheatList(appStartupCommands, nullptr, pCheatCodeManager, pCommandServer);
-
-				// The application startup commands are only run once when
-				// the first region is loaded.
-				RemoveNotification(kSC4MessagePostRegionInit);
-			}
+			// The application startup commands are only run once when
+			// the first region is loaded.
+			RemoveNotification(kSC4MessagePostRegionInit);
 		}
 	}
 
@@ -361,7 +336,6 @@ private:
 				if (pSC4App)
 				{
 					cISC4City* pCity = pSC4App->GetCity();
-					cIGZCheatCodeManager* pCheatCodeManager = pSC4App->GetCheatCodeManager();
 					cIGZCommandServerPtr pCommandServer;
 
 					if (pCity && pCheatCodeManager && pCommandServer)
@@ -419,6 +393,13 @@ private:
 
 		if (LoadCheatCodes())
 		{
+			cISC4AppPtr pSC4App;
+
+			if (pSC4App)
+			{
+				pCheatCodeManager = pSC4App->GetCheatCodeManager();
+			}
+
 			cIGZMessageServer2Ptr pMS2;
 
 			if (pMS2)
@@ -508,6 +489,7 @@ private:
 		}
 	}
 
+	cIGZCheatCodeManager* pCheatCodeManager;
 	std::vector<std::unique_ptr<ICheatListCommand>> appStartupCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadCommands;
 	std::vector<std::unique_ptr<ICheatListCommand>> tileLoadRunOnceCommands;
