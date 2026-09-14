@@ -56,9 +56,6 @@ static constexpr uint32_t kAutoRunCheatsDllDirector = 0x21E2B214;
 static constexpr uint32_t kLoadZoneBitmapCheatID = 0x5E9F8CFB;
 static constexpr std::string_view kLoadZoneBitmapCheatString = "LoadZoneBitmap";
 
-static constexpr std::string_view PluginConfigFileName = "SC4AutoRunCheats.ini";
-static constexpr std::string_view PluginLogFileName = "SC4AutoRunCheats.log";
-
 using namespace std::literals::string_view_literals; // Required for the sv suffix
 
 namespace
